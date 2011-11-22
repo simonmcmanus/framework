@@ -1,0 +1,11 @@
+ul {
+}
+
+ul li{
+	padding:1em;
+	margin:1em;
+	background:blue;
+	color:#fff;
+	display:inline;
+	
+}
