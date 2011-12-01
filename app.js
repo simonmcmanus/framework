@@ -17,6 +17,26 @@ app.register('.html', sizlate);
 
 // add modules
 
+
+structure.serve({
+	port: 80,
+	static: '/static',
+	sharedModules: ['shared'], 
+	views: {
+		home:  {
+			url: '/home',
+			view: 'home',
+			modules: [
+				'mainNav',
+				'content'
+			]
+		}
+	}
+}, app);
+
+
+
+/*
 app.modules.add('mainNav', app);
 app.modules.add('content', app);
 app.modules.add('contact', app);
@@ -31,6 +51,8 @@ views.home = structure.view({
 		'content'
 	]
 }, app);
+*/
+
 
 
 /*

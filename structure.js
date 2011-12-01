@@ -10,6 +10,50 @@ jsdom.debugMode = true;
 
 
 
+
+
+
+
+
+
+/*
+expects: 
+{
+	port: 80,
+	static: '/static',
+	sharedModule: ['shared'],
+	views {
+		home:  {
+			url: '/home',
+			view: 'home',
+			modules: [
+				'mainNav',
+				'content'
+			]
+		}
+	}
+}
+
+*/
+exports.serve = function(options, app) {
+	// on sizlate startup.
+
+	// expects an array.
+	var loadModules = function(modules) {
+		var c = modules.length;
+		while(c--){
+			app.modules.add(modules[c], app);
+		}
+	};
+	loadModules(options.sharedModules, app);
+	for(view in options.views){
+		loadModules(options.views[view].modules);
+		
+		// will probably need to be done after all modules have been loaded. 
+		exports.view(options, app);
+	}
+};
+
 // on request
 
 // auto find ids. 
@@ -37,8 +81,7 @@ exports.view = function(options, app) {
 			var wrapperCallback = function(type) {
 				return function(err, data) {
 					if( !err ){
-						that[type.slice(1)].push(data);
-						console.log(that);
+						that[type.slice(1)] = data;
 					} else {
 						console.log('ERROR');
 					}
@@ -67,7 +110,7 @@ exports.view = function(options, app) {
 			that.css = css.join('') + that.css;
 			that.js =  js.join('') + that.js;
 		}
- 		if(typeof req.params.format == "undefined"){
+ 		if(typeof req.params.format === "undefined"){
 			var layout = true;	
 		}else if(req.params.format == '.html'){
 			var layout = false;

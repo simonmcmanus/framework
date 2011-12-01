@@ -45,7 +45,9 @@ exports.add = function( moduleName, app ) {
 				}
 			};
 		};
-		fs.readFile( app.set( 'dirname' ) + '/' + MODULES_DIRECTORY + '/' + moduleName + '/' + moduleName + files[c], 'utf8', wrapperCallback(files[c]) );	
+		var file = app.set( 'dirname' ) + MODULES_DIRECTORY + '/' + moduleName + '/' + moduleName + files[c];
+		console.log( file );
+		fs.readFile( file, 'utf8', wrapperCallback(files[c]) );	
 	}
 	addRoutes( moduleName, app );
 };
