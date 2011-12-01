@@ -50,7 +50,7 @@ exports.serve = function(options, app) {
 		loadModules(options.views[view].modules);
 		
 		// will probably need to be done after all modules have been loaded. 
-		exports.view(options, app);
+		exports.view(options.views[view], app);
 	}
 };
 
@@ -88,7 +88,8 @@ exports.view = function(options, app) {
 				};
 			};
 			that[files[c].slice(1)] = [];
-			fs.readFile( app.set( 'dirname' )  + '/views/' + view + '/' + view + files[c], 'utf8', wrapperCallback(files[c]) );	
+			var fileName = app.set( 'dirname' )  + '/views/' + view + '/' + view + files[c];
+			fs.readFile( fileName, 'utf8', wrapperCallback(files[c]) );	
 		}
 	};
 	
@@ -102,7 +103,6 @@ exports.view = function(options, app) {
 			var css = [];
 			var js = [];
 			while(c--){
-				console.log(app.modules[options.modules[c]]);
 				selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
 				 css.push(app.modules[options.modules[c]].css);
 				 js.push(app.modules[options.modules[c]].js);

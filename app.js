@@ -30,6 +30,14 @@ structure.serve({
 				'mainNav',
 				'content'
 			]
+		},
+		contact:  {
+			url: '/contact',
+			view: 'contactMe',
+			modules: [
+				'mainNav',
+				'content'
+			]
 		}
 	}
 }, app);
