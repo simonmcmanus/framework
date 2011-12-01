@@ -1,7 +1,7 @@
-ul {
+#mainNav ul {
 }
 
-ul li{
+#mainNav ul li{
 	padding:1em;
 	margin:1em;
 	background:blue;
@@ -9,3 +9,4 @@ ul li{
 	display:inline;
 	
 }
+

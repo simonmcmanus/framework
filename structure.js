@@ -1,19 +1,22 @@
 var fs = require( 'fs' );
+var jsdom = require("jsdom");
+var express = require('express');
+var app = express.createServer();
+var sizlate = require('sizlate');
+app.modules = require('./modules.js');
+app.views = {};
+
+app.configure( function () {
+  app.set('view engine', 'html');
+  app.set('dirname', __dirname);
+});
+
+app.register('.html', sizlate);
 
 var jsdom = require('jsdom');
 
 var MODULES_DIRECTORY = '../modules';
 jsdom.debugMode = true;
-
-
-
-
-
-
-
-
-
-
 
 
 /*
@@ -35,10 +38,7 @@ expects:
 }
 
 */
-exports.serve = function(options, app) {
-	// on sizlate startup.
-
-	// expects an array.
+exports.serve = function(options) {
 	var loadModules = function(modules) {
 		var c = modules.length;
 		while(c--){
@@ -48,31 +48,19 @@ exports.serve = function(options, app) {
 	loadModules(options.sharedModules, app);
 	for(view in options.views){
 		loadModules(options.views[view].modules);
-		
-		// will probably need to be done after all modules have been loaded. 
-		exports.view(options.views[view], app);
+		new exports.view(options.views[view], app);
 	}
 };
 
-// on request
-
-// auto find ids. 
-// build css
-// cache css
-// build js 
-// cache js
-// build html 
-// cache html
-// build combined
-// cache combined.
-
-
-exports.view = function(options, app) {
+exports.view = function(options) {
 	var that = this;
 	var init = function(options) {
 		getFiles(options.view);
+		app.get('/layout.js', function(req, res) {
+			res.download(app.set( 'dirname' )  + '/views/layout.js');
+		});
+		
 	};
-	
 	
 	var getFiles = function(view) {
 		var files =  ['.js', '.css', '.html'];
@@ -81,7 +69,10 @@ exports.view = function(options, app) {
 			var wrapperCallback = function(type) {
 				return function(err, data) {
 					if( !err ){
-						that[type.slice(1)] = data;
+						if(!app.views[view]){
+							app.views[view] = {};
+						};
+						app.views[view][type.slice(1)] = data;
 					} else {
 						console.log('ERROR');
 					}
@@ -93,46 +84,87 @@ exports.view = function(options, app) {
 		}
 	};
 	
-	app.get(options.url+":format?", function(req, res, next) {
-		// if no selectors are specified, look for ids with same name as the module name on the view/layout specified.
-		if(!options.selectors){
-			// this is  all so wrong, this should this stuff is needed for css files and js files, at the moment you will only be able to get the full css after generating the html.
+	// if no selectors are specified create selectors with the ids from the module names on the view/layout specified.
+	var buildSelectors = function(options) {
+		if(options.selectors){ // TODO: should really be merged with the below.
+			return options.selectors;
+		}else {
 			var c = options.modules.length;
 			selectors = {};
-			
-			var css = [];
-			var js = [];
 			while(c--){
 				selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
-				 css.push(app.modules[options.modules[c]].css);
-				 js.push(app.modules[options.modules[c]].js);
 			}
-			that.css = css.join('') + that.css;
-			that.js =  js.join('') + that.js;
+			return selectors;
 		}
- 		if(typeof req.params.format === "undefined"){
-			var layout = true;	
-		}else if(req.params.format == '.html'){
-			var layout = false;
-		}else{
-			next();
-		}
+	};
+	
+	app.get(options.url, function(req, res, next) {
 		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
-			layout: layout,
-			selectors: options.selectors || selectors
+			layout: true,
+			selectors: buildSelectors(options)
+		});
+	});
+	
+	app.get(options.url+".html", function(req, res, next) {
+		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
+			layout: false,
+			selectors: buildSelectors(options)
 		});
 	});
 
+	/*
+		returns a string containing all files of 'type' required for the view.
+		type - eg. css or js
+	*/
+	var fetchModuleType = function(type, view) {
+		var modules = options.modules;
+		var c = modules.length;
+		var out = [];
+		
+		while(c--){
+			out.push('/* ' + type + ' From Module:' + modules[c] + ' */');
+			out.push(app.modules[modules[c]][type]);
+		}
+		if(type=="js"){ // for js modueles need to extend the view
+			out.unshift('/* ' + type + ' From View:' + view + ' */');
+			out.unshift(app.views[view][type]);
+			
+		}else {
+			out.push('/* ' + type + ' From View:' + view + ' */');
+			out.push(app.views[view][type]);
+			
+		}
+		
+		return out.join('\r\n');
+	};
 
-
+	var fetchModuleTypeWrapper = function(type, view) {
+		console.log(type, view);
+		return function(req, res) {
+			res.send(fetchModuleType(type, view));
+		}
+	}
+	app.get(options.url+'.css', fetchModuleTypeWrapper('css', view));
+	app.get(options.url+'.js', fetchModuleTypeWrapper('js', view));
 	
-	app.get(options.url+'.css', function(req, res) {
-		res.send(that.css);
-	});
-	
-	app.get(options.url+'.js', function(req, res) {
-		// add css from modules.
-			res.send(that.js );
-	});
 	init(options);
 };
+
+
+app.get('/shared/shared.js', function(req, res) {
+	res.download('./shared/shared.js');
+});
+
+
+app.listen(81);
+/*
+var buildConsollidated = function() {
+	var css = [];
+	var js = [];
+	css.push(app.modules[options.modules[c]].css);
+	js.push(app.modules[options.modules[c]].js);
+	that.css = css.join('') + that.css;
+	that.js =  js.join('') + that.js;
+	
+};
+*/

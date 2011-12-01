@@ -1,1 +1,1 @@
-alert('mainMenu');
+alert('mainMenu3');
