@@ -127,10 +127,14 @@ exports.view = function(options) {
 		}
 		if(type=="js"){ // for js modueles need to extend the view
 			out.unshift('/* ' + type + ' From View:' + view + ' */');
+			console.log(app.views, view);
 			out.unshift(app.views[view][type]);
 			
 		}else {
 			out.push('/* ' + type + ' From View:' + view + ' */');
+			if(!app.views[view]){
+				app.views[view] = {};
+			}
 			out.push(app.views[view][type]);
 			
 		}

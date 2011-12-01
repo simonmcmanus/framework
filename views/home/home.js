@@ -6,8 +6,6 @@ views.home = function() {
 	var that = this;
 	var init = function() {
 		that.domNode = $('#container');
-		alert('VIEW ALERT');
-		console.log(that);
 	};
 	init();
 };
