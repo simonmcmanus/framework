@@ -35,7 +35,7 @@ exports.serve = function(options) {
 		},
 		function loadView() {
 			for(view in options.views){
-				new exports.view(options.views[view], app);
+				new exports.view(options.views[view], options);
 			}
 		}
 	);
@@ -43,7 +43,7 @@ exports.serve = function(options) {
 
 
 // if no selectors are specified create selectors with the ids from the module names on the view/layout specified.
-var buildSelectors = function(options) {
+var buildSelectors = function(options, allOptions) {
 	if(options.selectors){ // TODO: should really be merged with the below.
 		return options.selectors;
 	}else {
@@ -52,11 +52,13 @@ var buildSelectors = function(options) {
 		while(c--){
 			selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
 		}
+		
+		selectors['#structureOptions'] = 'var options = ' + JSON.stringify(allOptions);
 		return selectors;
 	}
 };
-
-exports.view = function(options) {
+// TODO _ remove allOptions - its hacky
+exports.view = function(options, allOptions) {
 	var that = this;
 
 	
@@ -89,14 +91,14 @@ exports.view = function(options) {
 	app.get(options.url, function(req, res, next) {
 		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
 			layout: true,
-			selectors: buildSelectors(options)
+			selectors: buildSelectors(options, allOptions)
 		});
 	});
 
 	app.get(options.url+".html", function(req, res, next) {
 		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
 			layout: false,
-			selectors: buildSelectors(options)
+			selectors: buildSelectors(options, allOptions)
 		});
 	});
 
