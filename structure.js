@@ -41,59 +41,58 @@ exports.serve = function(options) {
 	);
 };
 
+
+// if no selectors are specified create selectors with the ids from the module names on the view/layout specified.
+var buildSelectors = function(options) {
+	if(options.selectors){ // TODO: should really be merged with the below.
+		return options.selectors;
+	}else {
+		var c = options.modules.length;
+		selectors = {};
+		while(c--){
+			selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
+		}
+		return selectors;
+	}
+};
+
 exports.view = function(options) {
 	var that = this;
+
+	
+	var getFiles = function(view) {
+		Step(
+			function getFiles() {
+				var viewPath = app.set( 'dirname' )  + '/views/' + view + '/' + view;
+				fs.readFile( viewPath + '.html', 'utf8', this.parallel() );
+				fs.readFile( viewPath + '.css', 'utf8',  this.parallel() );
+				fs.readFile( viewPath + '.js', 'utf8', this.parallel() );
+			},
+			function setFiles(error, html, css, js) {
+				app.views[view] = {
+					html: html,
+					css: css,
+					js: js
+				};
+			}
+		); 
+	};
+	
 	var init = function(options) {
 		getFiles(options.view);
 		app.get('/layout.js', function(req, res) {
 			res.download(app.set( 'dirname' )  + '/views/layout.js');
 		});
 	};
-	
-	var getFiles = function(view) {
-		var files =  ['.js', '.css', '.html'];
-		var c = files.length;
-		while(c--){
-			var wrapperCallback = function(type) {
-				return function(err, data) {
-					if( !err ){
-						if(!app.views[view]){
-							app.views[view] = {};
-						};
-						app.views[view][type.slice(1)] = data;
-						// all good here
-						//console.log(view, type.slice(1), app.views[view][type.slice(1)]);
-					} else {
-						console.log('ERROR');
-					}
-				};
-			};
-			var fileName = app.set( 'dirname' )  + '/views/' + view + '/' + view + files[c];
-			fs.readFile( fileName, 'utf8', wrapperCallback(files[c]) );	
-		}
-	};
-	
-	// if no selectors are specified create selectors with the ids from the module names on the view/layout specified.
-	var buildSelectors = function(options) {
-		if(options.selectors){ // TODO: should really be merged with the below.
-			return options.selectors;
-		}else {
-			var c = options.modules.length;
-			selectors = {};
-			while(c--){
-				selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
-			}
-			return selectors;
-		}
-	};
-	
+
+
 	app.get(options.url, function(req, res, next) {
 		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
 			layout: true,
 			selectors: buildSelectors(options)
 		});
 	});
-	
+
 	app.get(options.url+".html", function(req, res, next) {
 		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
 			layout: false,
@@ -131,13 +130,13 @@ exports.view = function(options) {
 
 	var fetchModuleTypeWrapper = function(type, view) {
 		return function(req, res) {
-			res.send(fetchModuleType(type, view));
+			res.send( fetchModuleType( type, view ) );
 		}
 	}
-	app.get(options.url+'.css', fetchModuleTypeWrapper('css', options.view));
-	app.get(options.url+'.js', fetchModuleTypeWrapper('js', options.view));
+	app.get( options.url + '.css', fetchModuleTypeWrapper( 'css', options.view ) );
+	app.get( options.url + '.js', fetchModuleTypeWrapper( 'js', options.view ) );
 	
-	init(options);
+	init( options );
 };
 
 
@@ -147,14 +146,3 @@ app.get('/shared/shared.js', function(req, res) {
 
 
 app.listen(81);
-/*
-var buildConsollidated = function() {
-	var css = [];
-	var js = [];
-	css.push(app.modules[options.modules[c]].css);
-	js.push(app.modules[options.modules[c]].js);
-	that.css = css.join('') + that.css;
-	that.js =  js.join('') + that.js;
-	
-};
-*/
