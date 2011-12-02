@@ -51,7 +51,7 @@ exports.add = function( moduleName, app, callback ) {
 				return true;
 			}
 		}, 
-		(callback) ? callback : function() {}
+	callback
 	);
 	addRoutes( moduleName, app );
 };

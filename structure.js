@@ -12,77 +12,35 @@ app.configure( function () {
 });
 
 app.register('.html', sizlate);
-
 var jsdom = require('jsdom');
+var Step = require('step');
 
 var MODULES_DIRECTORY = '../modules';
 jsdom.debugMode = true;
 
-
-/*
-expects: 
-{
-	port: 80,
-	static: '/static',
-	sharedModule: ['shared'],
-	views {
-		home:  {
-			url: '/home',
-			view: 'home',
-			modules: [
-				'mainNav',
-				'content'
-			]
-		}
-	}
-}
-
-
-
-*/
-var Step = require('step');
-
-
-
 exports.serve = function(options) {
-	var out = 0;
-	var loadModules = function(modules) {
-		var c = modules.length;
-		while(c--){
-			app.modules.add(modules[c], app);
+	Step(
+		function getModules() {
+			var that = this;
+			var loadModules = function(modules) {
+				var c = modules.length;
+				while(c--){
+					app.modules.add(modules[c], app, that.parallel());
+				}
+			};
+			loadModules(options.sharedModules, app);
+			for(view in options.views){
+				loadModules(options.views[view].modules);
+			}
+		},
+		function loadView() {
+			for(view in options.views){
+				new exports.view(options.views[view], app);
+			}
 		}
-	};
-	loadModules(options.sharedModules, app);
-	for(view in options.views){
-		loadModules(options.views[view].modules);
-		// when all modules have been loaded. 
-		
-		new exports.view(options.views[view], app);
-	}
+	);
 };
 
-
-
-/*
-exports.serve = function(options) {
-	var steps = [];
-	var out = 0;
-	var loadModules = function(modules) {
-		var c = modules.length;
-		while(c--){
-			app.modules.add(modules[c], app);
-		}
-	};
-	loadModules(options.sharedModules, app);
-	for(view in options.views){
-		loadModules(options.views[view].modules);
-		// when all modules have been loaded. 
-		
-		new exports.view(options.views[view], app);
-	}
-	
-};
-*/
 exports.view = function(options) {
 	var that = this;
 	var init = function(options) {
@@ -90,7 +48,6 @@ exports.view = function(options) {
 		app.get('/layout.js', function(req, res) {
 			res.download(app.set( 'dirname' )  + '/views/layout.js');
 		});
-		
 	};
 	
 	var getFiles = function(view) {
@@ -104,6 +61,8 @@ exports.view = function(options) {
 							app.views[view] = {};
 						};
 						app.views[view][type.slice(1)] = data;
+						// all good here
+						//console.log(view, type.slice(1), app.views[view][type.slice(1)]);
 					} else {
 						console.log('ERROR');
 					}
@@ -147,6 +106,7 @@ exports.view = function(options) {
 		type - eg. css or js
 	*/
 	var fetchModuleType = function(type, view) {
+		console.log('fetchmodule ', type, view);
 		var modules = options.modules;
 		var c = modules.length;
 		var out = [];
@@ -157,8 +117,8 @@ exports.view = function(options) {
 		}
 		if(type=="js"){ // for js modueles need to extend the view
 			if(app.views[view]){
-				out.unshift('/* ' + type + ' From View:' + view + ' */');
 				out.unshift(app.views[view][type]);
+				out.unshift('/* ' + type + ' From View:' + view + ' */');
 			}
 		}else {
 			if(app.views[view]){
@@ -170,13 +130,12 @@ exports.view = function(options) {
 	};
 
 	var fetchModuleTypeWrapper = function(type, view) {
-		console.log(type, view);
 		return function(req, res) {
 			res.send(fetchModuleType(type, view));
 		}
 	}
-	app.get(options.url+'.css', fetchModuleTypeWrapper('css', view));
-	app.get(options.url+'.js', fetchModuleTypeWrapper('js', view));
+	app.get(options.url+'.css', fetchModuleTypeWrapper('css', options.view));
+	app.get(options.url+'.js', fetchModuleTypeWrapper('js', options.view));
 	
 	init(options);
 };
