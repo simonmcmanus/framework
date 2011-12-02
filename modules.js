@@ -29,26 +29,30 @@ addRoutes = function( moduleName, app ) {
 };
 
 // fetches required files and sets up the routes.
-exports.add = function( moduleName, app ) {
-	var files =  ['.js', '.css', '.html'];
-	var c = files.length;
-	while(c--){
-		var wrapperCallback = function(type) {
-			return function(err, data) {
-				if( !err ){
-					if(!exports[moduleName]){
-						exports[moduleName] = {};
-					}
-					exports[moduleName][type.slice(1)] = data;
-				} else {
-					console.log('ERROR');
+
+var Step = require('step');
+
+exports.add = function( moduleName, app, callback ) {
+	Step(
+		function readFiles() {
+			var file = app.set( 'dirname' ) + MODULES_DIRECTORY + '/' + moduleName + '/' + moduleName;
+			fs.readFile(file + '.html', 'utf8', this.parallel() );
+			fs.readFile(file + '.css', 'utf8', this.parallel() );
+			fs.readFile(file + '.js', 'utf8', this.parallel() );
+		}, 
+		function showIt(err, html, css, js) {
+			if(!err){
+				if(!exports[moduleName]){
+					exports[moduleName] = {};
 				}
-			};
-		};
-		var file = app.set( 'dirname' ) + MODULES_DIRECTORY + '/' + moduleName + '/' + moduleName + files[c];
-		console.log( file );
-		fs.readFile( file, 'utf8', wrapperCallback(files[c]) );	
-	}
+				exports[moduleName].html = html;
+				exports[moduleName].css = css;
+				exports[moduleName].js = js;
+				return true;
+			}
+		}, 
+		(callback) ? callback : function() {}
+	);
 	addRoutes( moduleName, app );
 };
 

@@ -37,8 +37,15 @@ expects:
 	}
 }
 
+
+
 */
+var Step = require('step');
+
+
+
 exports.serve = function(options) {
+	var out = 0;
 	var loadModules = function(modules) {
 		var c = modules.length;
 		while(c--){
@@ -48,10 +55,34 @@ exports.serve = function(options) {
 	loadModules(options.sharedModules, app);
 	for(view in options.views){
 		loadModules(options.views[view].modules);
+		// when all modules have been loaded. 
+		
 		new exports.view(options.views[view], app);
 	}
 };
 
+
+
+/*
+exports.serve = function(options) {
+	var steps = [];
+	var out = 0;
+	var loadModules = function(modules) {
+		var c = modules.length;
+		while(c--){
+			app.modules.add(modules[c], app);
+		}
+	};
+	loadModules(options.sharedModules, app);
+	for(view in options.views){
+		loadModules(options.views[view].modules);
+		// when all modules have been loaded. 
+		
+		new exports.view(options.views[view], app);
+	}
+	
+};
+*/
 exports.view = function(options) {
 	var that = this;
 	var init = function(options) {
@@ -78,7 +109,6 @@ exports.view = function(options) {
 					}
 				};
 			};
-			that[files[c].slice(1)] = [];
 			var fileName = app.set( 'dirname' )  + '/views/' + view + '/' + view + files[c];
 			fs.readFile( fileName, 'utf8', wrapperCallback(files[c]) );	
 		}
@@ -126,19 +156,16 @@ exports.view = function(options) {
 			out.push(app.modules[modules[c]][type]);
 		}
 		if(type=="js"){ // for js modueles need to extend the view
-			out.unshift('/* ' + type + ' From View:' + view + ' */');
-			console.log(app.views, view);
-			out.unshift(app.views[view][type]);
-			
-		}else {
-			out.push('/* ' + type + ' From View:' + view + ' */');
-			if(!app.views[view]){
-				app.views[view] = {};
+			if(app.views[view]){
+				out.unshift('/* ' + type + ' From View:' + view + ' */');
+				out.unshift(app.views[view][type]);
 			}
-			out.push(app.views[view][type]);
-			
+		}else {
+			if(app.views[view]){
+				out.push('/* ' + type + ' From View:' + view + ' */');
+				out.push(app.views[view][type]);
+			}	
 		}
-		
 		return out.join('\r\n');
 	};
 

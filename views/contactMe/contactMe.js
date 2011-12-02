@@ -2,6 +2,7 @@ views.contactMe = function() {
 	var that = this;
 	var init = function() {
 		that.domNode = $('#container');
+		alert('CONTACT ME LOADED');
 	};
 	init();
 };
