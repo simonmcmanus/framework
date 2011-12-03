@@ -4,6 +4,16 @@ var express = require('express');
 var app = express.createServer();
 var sizlate = require('sizlate');
 app.modules = require('./modules.js');
+
+
+
+
+/*hard coded modules*/
+
+var flickr =  require('./modules/flickr/app.js');
+
+
+
 app.views = {};
 
 app.configure( function () {
@@ -19,6 +29,14 @@ var MODULES_DIRECTORY = '../modules';
 jsdom.debugMode = true;
 
 exports.serve = function(options) {
+	
+	app.get('/layout.css', function(req, res) {
+		res.download(app.set( 'dirname' )  + '/views/layout.css');
+	});
+	app.get('/layout.js', function(req, res) {
+		res.download(app.set( 'dirname' )  + '/views/layout.js');
+	});
+	
 	Step(
 		function getModules() {
 			var that = this;
@@ -39,21 +57,34 @@ exports.serve = function(options) {
 			}
 		}
 	);
+	app.listen(options.port);
 };
 
 
 // if no selectors are specified create selectors with the ids from the module names on the view/layout specified.
-var buildSelectors = function(options, allOptions) {
+var buildSelectors = function(data, options, allOptions) {
 	if(options.selectors){ // TODO: should really be merged with the below.
 		return options.selectors;
 	}else {
 		var c = options.modules.length;
 		selectors = {};
 		while(c--){
-			selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
+			
+			if(data && options.modules[c] == 'flickr'){ // hacky
+				//console.log(app.modules[options.modules[c]].html);
+				//console.log('got data for: #'+options.modules[c], app.modules[options.modules[c]].html, data);
+				
+				selectors['#'+options.modules[c]] = sizlate.doRender(app.modules[options.modules[c]].html, data);;
+				
+			}
+			else {
+				selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
+			}
 		}
 		
-		selectors['#structureOptions'] = 'var options = ' + JSON.stringify(allOptions);
+		
+		
+		selectors['script#structureOptions'] = 'var options = ' + JSON.stringify(allOptions);
 		return selectors;
 	}
 };
@@ -82,33 +113,42 @@ exports.view = function(options, allOptions) {
 	
 	var init = function(options) {
 		getFiles(options.view);
-		app.get('/layout.js', function(req, res) {
-			res.download(app.set( 'dirname' )  + '/views/layout.js');
-		});
 	};
 
+	var buildView= function(data,  format, layout) {
+		app.get(options.url + format, function(req, res, next) {
+			res.render(__dirname + '/views/' + options.view + '/' + options.view + format, {
+				layout: layout,
+				classifyKeys: false, 
+				selectors: buildSelectors(data, options, allOptions)
+			});
+		});		
+	}
+	
+	// TODO - auto require flickr if it exists. 
+	// do not hard code to flickr.
+	// come up with a better name than get photos
+	if(	flickr.getPhotos ){
+		flickr.getPhotos(function(data){
+			buildView(data, '.html', false);
+			buildView(data, '', true);
+		})
+	}else {
+		buildView(null, '.html', false);
+		buildView(null, '', true);
+	}
 
-	app.get(options.url, function(req, res, next) {
-		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
-			layout: true,
-			selectors: buildSelectors(options, allOptions)
-		});
-	});
 
-	app.get(options.url+".html", function(req, res, next) {
-		res.render(__dirname + '/views/' + options.view + '/' + options.view + '.html', {
-			layout: false,
-			selectors: buildSelectors(options, allOptions)
-		});
-	});
+
+
+
 
 	/*
 		returns a string containing all files of 'type' required for the view.
 		type - eg. css or js
 	*/
 	var fetchModuleType = function(type, view) {
-		console.log('fetchmodule ', type, view);
-		var modules = options.modules;
+		modules = options.modules;
 		var c = modules.length;
 		var out = [];
 		
@@ -146,5 +186,3 @@ app.get('/shared/shared.js', function(req, res) {
 	res.download('./shared/shared.js');
 });
 
-
-app.listen(81);

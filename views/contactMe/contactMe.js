@@ -5,21 +5,25 @@ views.contactMe = function() {
 	};
 	
 	
+	
 	that.show = function() {
 		that.domNode.css({
-			position:'absolute',
-			left:'-30em'
+			marginLeft:'-30em'
 		}).show().animate({
-			left:'3em'
+			marginLeft:'0em'
 		}, 200);
 	};
 	that.hide = function(callback) {
 		that.domNode.css({
-			position:'absolute',
-			left:'3em'
+			marginLeft:'0em'
 		}).animate({
-			left:'-3em'
-		}, 200, callback);
+			marginLeft:'-30em'
+		}, 200, function() {
+			$(this).hide().css({
+				marginLeft: '0em'
+			});
+			callback();
+		});
 	};
 	
 	init();
