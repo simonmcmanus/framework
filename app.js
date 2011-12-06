@@ -1,7 +1,7 @@
 var structure = require('./structure.js');
 
 structure.serve({
-	port: 80,
+	port: 81,
 	static: '/static',
 	sharedModules: ['shared'],
 	views: {

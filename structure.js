@@ -10,7 +10,7 @@ app.modules = require('./modules.js');
 
 /*hard coded modules*/
 
-var flickr =  require('./modules/flickr/app.js');
+app.modules.flickr =  require('./modules/flickr/app.js');
 
 
 
@@ -71,11 +71,8 @@ var buildSelectors = function(data, options, allOptions) {
 		while(c--){
 			
 			if(data && options.modules[c] == 'flickr'){ // hacky
-				//console.log(app.modules[options.modules[c]].html);
-				//console.log('got data for: #'+options.modules[c], app.modules[options.modules[c]].html, data);
 				
-				selectors['#'+options.modules[c]] = sizlate.doRender(app.modules[options.modules[c]].html, data);;
-				
+				selectors['#'+options.modules[c]] = sizlate.doRender(app.modules[options.modules[c]].html, data);
 			}
 			else {
 				selectors['#'+options.modules[c]] = app.modules[options.modules[c]].html;
@@ -85,6 +82,7 @@ var buildSelectors = function(data, options, allOptions) {
 		
 		
 		selectors['script#structureOptions'] = 'var options = ' + JSON.stringify(allOptions);
+		//console.log('', selectors);
 		return selectors;
 	}
 };
@@ -114,41 +112,85 @@ exports.view = function(options, allOptions) {
 	var init = function(options) {
 		getFiles(options.view);
 	};
-
-	var buildView= function(data,  format, layout) {
+/*
+	var modules =  allOptions.sharedModules.concat(options.modules);
+	var buildView= function(format, layout) {
 		app.get(options.url + format, function(req, res, next) {
+			
+			var steps = [];
+			var c = modules.length;
+			while(c--){
+				console.log(app.modules);
+				console.log(app.modules[modules[c]].getPhotos);
+				
+				
+				
+				modules.push(function() {});
+				// see if module has data function, 
+				// if it does call it then call callback
+				// if not just call the callback
+			}
+			var getDataForModule = function() {
+				
+			};
+			Step();
+			res.render(__dirname + '/views/' + options.view + '/' + options.view + format, {
+				layout: layout,
+				classifyKeys: false, 
+				selectors: buildSelectors(null, options, allOptions)
+			});
+		});		
+	}
+	
+	buildView('', true);
+	buildView('.html', false );
+*/
+
+
+
+var buildView= function(format, layout) {
+	app.get(options.url + format, function(req, res, next) {
+		var modules =  allOptions.sharedModules.concat(options.modules);
+		var stepsA = [];
+		var c = modules.length;
+		/*
+			Returns a function to be added to a steps array.
+		*/
+		var getPhoto = function( app, mod ) {
+			return function() {
+				app.modules.flickr.getPhotos( this );
+			}
+		};
+		while(c--){
+			
+			var mod = modules[c];
+			if( typeof app.modules[mod].getPhotos != "undefined" ) {
+				stepsA.push( getPhoto( app, mod ) );
+			}
+		}
+
+		var doRender = function(data) {
 			res.render(__dirname + '/views/' + options.view + '/' + options.view + format, {
 				layout: layout,
 				classifyKeys: false, 
 				selectors: buildSelectors(data, options, allOptions)
 			});
-		});		
-	}
-	
-	// TODO - auto require flickr if it exists. 
-	// do not hard code to flickr.
-	// come up with a better name than get photos
-	if(	flickr.getPhotos ){
-		flickr.getPhotos(function(data){
-			buildView(data, '.html', false);
-			buildView(data, '', true);
-		})
-	}else {
-		buildView(null, '.html', false);
-		buildView(null, '', true);
-	}
+		};
+		stepsA.push(doRender);
+		
+		Step.apply(this, stepsA);
+	});		
+}
 
-
-
-
-
+buildView( '', true );
+buildView( '.html', false );
 
 	/*
 		returns a string containing all files of 'type' required for the view.
 		type - eg. css or js
 	*/
 	var fetchModuleType = function(type, view) {
-		modules = options.modules;
+		var modules = options.modules;
 		var c = modules.length;
 		var out = [];
 		
