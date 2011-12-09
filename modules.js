@@ -6,7 +6,7 @@ todo : serve consolidated files.
 **/
 
 var fs = require( 'fs' );
-var jsdom = require('jsdom');
+var jsdom = require( 'jsdom' );
 
 
 var MODULES_DIRECTORY = '/modules';
@@ -18,13 +18,13 @@ addRoutes = function( moduleName, app ) {
 	// todo : do not add route if the files does not exist.
 	var files =  ['.js', '.css', '.html'];
 	var c = files.length;
-	while(c--){
-		var wrapperCallback = function(type) { // to pass in type
-			return function(req, res) {
-				res.send(exports[moduleName][type]);				
+	while(c--) {
+		var wrapperCallback = function( type ) { // to pass in type
+			return function( req, res ) {
+				res.send( exports[moduleName][type] );
 			}
 		};
-		app.get('/' + moduleName + files[c], wrapperCallback(files[c]));
+		app.get( '/' + moduleName + files[c], wrapperCallback( files[c] ) );
 	}
 };
 
@@ -36,34 +36,29 @@ exports.add = function( moduleName, app, callback ) {
 	Step(
 		function readFiles() {
 			var file = app.set( 'dirname' ) + MODULES_DIRECTORY + '/' + moduleName + '/' + moduleName;
-			fs.readFile(file + '.html', 'utf8', this.parallel() );
-			fs.readFile(file + '.css', 'utf8', this.parallel() );
-			fs.readFile(file + '.js', 'utf8', this.parallel() );
+			console.log(file);
+			fs.readFile( file + '.html', 'utf8', this.parallel() );
+			fs.readFile( file + '.css', 'utf8', this.parallel() );
+			fs.readFile( file + '.js', 'utf8', this.parallel() );
 		}, 
-		function showIt(err, html, css, js) {
-			if(!err){
-				if(!exports[moduleName]){
+		function showIt( err, html, css, js ) {	
+			if( !err ){
+				if( !exports[moduleName] ){
 					exports[moduleName] = {};
 				}
+				
 				exports[moduleName].html = html;
 				exports[moduleName].css = css;
 				exports[moduleName].js = js;
 				return true;
+			}else {
+				console.log('THERE IS A PROBLEM WITH ONE OF YOUR MODULES');
 			}
-		}, 
-	callback
+		},
+		callback
 	);
 	addRoutes( moduleName, app );
-};
-
-
-
-
-
-
-
-
-
+};	
 
 
 

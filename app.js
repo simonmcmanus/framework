@@ -1,7 +1,6 @@
 var structure = require('./structure.js');
-
 structure.serve({
-	port: 81,
+	port: 82,
 	static: '/static',
 	sharedModules: ['shared'],
 	views: {
@@ -30,6 +29,7 @@ structure.serve({
 			modules: [
 				'mainNav',
 				'content',
+				'flickr2',
 				'flickr'
 			]
 		}
