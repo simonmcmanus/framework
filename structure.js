@@ -10,7 +10,7 @@ app.modules = require('./modules.js');
 
 /*hard coded modules*/
 
-app.modules.flickr = require('./modules/flickr2/app.js');
+app.modules.flickr = require('./modules/flickr/app.js');
 app.modules.flickr2 = require('./modules/flickr2/app.js');
 
 
@@ -45,7 +45,7 @@ exports.serve = function(options) {
         var loadModules = function(modules, stepObj) {
 			var c = modules.length;
 			while (c--) {
-				console.log('adding', modules[c]);
+				//console.log('adding', modules[c]);
 				app.modules.add(modules[c], app, stepObj.parallel());
 			}
         };
@@ -56,7 +56,6 @@ exports.serve = function(options) {
     },
     function loadView() {
         for (view in options.views) {
-            console.log('view', view);
             new exports.view(options.views[view], options);
         }
     }
@@ -75,18 +74,12 @@ var buildSelectors = function(data, options, allOptions) {
         var c = options.modules.length;
         selectors = {};
         while (c--) {
-
-            if (data && options.modules[c] == 'flickr') {
-                // hacky
-                selectors['#' + options.modules[c]] = sizlate.doRender(app.modules[options.modules[c]].html, data);
-            }
-            else {
+			if(data[options.modules[c]]){
+				selectors['#' + options.modules[c]] = sizlate.doRender(app.modules[options.modules[c]].html, data[options.modules[c]]);
+            } else {
 	            selectors['#' + options.modules[c]] = app.modules[options.modules[c]].html;
             }
         }
-
-
-
         selectors['script#structureOptions'] = 'var options = ' + JSON.stringify(allOptions);
         return selectors;
     }
@@ -114,47 +107,60 @@ exports.view = function(options, allOptions) {
         );
     };
 
-
-
-
     var buildView = function(format, layout) {
         //console.log('format', format);
         app.get(options.url + format,
         function(req, res, next) {
             var stepsA = [];
             //	Returns a function to be added to a steps array.
-            var getPhoto = function(app, mod) {
+            var getPhoto = function(app, mod, that) {
                 return function(err, data) {
-                    //console.log('d', data);
-                    //TODO  should be done in parallel.
-                    app.modules[mod].getSelectors(data, that.parallel());
+	
+					app.modules[mod].getSelectors( that.parallel() );
                 }
             };
 
 
             var getPhotos = function() {
-                var that = this;
+				var that = this;
                 var modules = allOptions.sharedModules.concat(options.modules);
                 var c = modules.length;
-                var out = [];
+				var out = [];
                 while (c--) {
                     var mod = modules[c];
-//console.log(app.modules, mod);
                     if (app.modules[mod] && typeof app.modules[mod].getSelectors != "undefined") {
-                        getPhoto(app, mod);
+	                    getPhoto(app, mod, that)();
                     }
                 }
-                return out;
             }
+			
+			stepsA.push(getPhotos);
 
-            stepsA.push(getPhotos());
 
-            var doRender = function(data) {
-                //console.log('args', arguments);
+
+
+
+
+
+
+
+
+            var doRender = function(err, data, data2) {
+//	console.log('args', arguments);
+	
+				var out = {
+					'flickr': data,
+					'flickr2': data2
+				};
+	
+				
+				var selectors = buildSelectors(out, options, allOptions);
+				
+				
                 res.render(__dirname + '/views/' + options.view + '/' + options.view + format, {
                     layout: layout,
                     classifyKeys: false,
-                    selectors: buildSelectors(data, options, allOptions)
+                    selectors: selectors
                 });
             };
             stepsA.push(doRender);
@@ -198,9 +204,7 @@ exports.view = function(options, allOptions) {
     }
 
     var init = function(options) {
-        //console.log(33);
         getFiles(options.view);
-        //console.log(33);
         buildView('', true);
         buildView('.html', false);
         app.get(options.url + '.css', fetchModuleTypeWrapper('css', options.view));
