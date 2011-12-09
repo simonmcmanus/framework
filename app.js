@@ -18,6 +18,15 @@ structure.serve({
 			modules: [
 				'mainNav',
 				'content'
+			]	
+		},
+		
+		photo:  {
+			url: '/photo/:photo',
+			view: 'photo',
+			modules: [
+				'mainNav',
+				'content'
 			]
 		},
 		

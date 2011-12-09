@@ -17,6 +17,11 @@ app.modules.flickr2 = require('./modules/flickr2/app.js');
 
 app.views = {};
 
+app.views['photo'] = {
+	app: require('./views/photo/app.js')
+};
+
+
 app.configure(function() {
     app.set('view engine', 'html');
     app.set('dirname', __dirname);
@@ -108,55 +113,51 @@ exports.view = function(options, allOptions) {
     };
 
     var buildView = function(format, layout) {
-        //console.log('format', format);
+	
         app.get(options.url + format,
         function(req, res, next) {
             var stepsA = [];
             //	Returns a function to be added to a steps array.
-            var getPhoto = function(app, mod, that) {
+            var getSelectors = function(app, mod, that) {
                 return function(err, data) {
-	
-					app.modules[mod].getSelectors( that.parallel() );
+	                if ( typeof app.modules[mod] != "undefined" && typeof app.modules[mod].getSelectors != "undefined" ) {
+						app.modules[mod].getSelectors( that.parallel() );
+					}
                 }
             };
 
-
-            var getPhotos = function() {
+            var getModuleSelectors = function() {
 				var that = this;
                 var modules = allOptions.sharedModules.concat(options.modules);
                 var c = modules.length;
 				var out = [];
                 while (c--) {
                     var mod = modules[c];
-                    if (app.modules[mod] && typeof app.modules[mod].getSelectors != "undefined") {
-	                    getPhoto(app, mod, that)();
-                    }
+                    if ( typeof app.modules[mod] != "undefined" && typeof app.modules[mod].getSelectors != "undefined" ) {
+	                     getSelectors(app, mod, that)();
+                    }else {
+						that.parallel()();
+					}
                 }
             }
-			
-			stepsA.push(getPhotos);
 
-
-
-
-
-
-
-
-
+			stepsA.push(getModuleSelectors);
 
             var doRender = function(err, data, data2) {
-//	console.log('args', arguments);
+				console.log('>>');
 	
-				var out = {
-					'flickr': data,
-					'flickr2': data2
-				};
-	
-				
+				if(err){
+					console.log('ERROR: ', err[0].message);
+				}
+				if(data && data2){
+					var out = {
+						'flickr': data,
+						'flickr2': data2
+					};
+				}else {
+					var out = {};
+				}
 				var selectors = buildSelectors(out, options, allOptions);
-				
-				
                 res.render(__dirname + '/views/' + options.view + '/' + options.view + format, {
                     layout: layout,
                     classifyKeys: false,
@@ -164,6 +165,7 @@ exports.view = function(options, allOptions) {
                 });
             };
             stepsA.push(doRender);
+
             Step.apply(this, stepsA);
         });
     }
