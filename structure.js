@@ -7,12 +7,12 @@ app.modules = require('./modules.js');
 
 
 
-
 /*hard coded modules*/
 
 app.modules.flickr = require('./modules/flickr/app.js');
 app.modules.flickr2 = require('./modules/flickr2/app.js');
 
+app.modules.photo = require('./modules/photo/app.js');
 
 
 app.views = {};
@@ -51,7 +51,19 @@ exports.serve = function(options) {
 			var c = modules.length;
 			while (c--) {
 				//console.log('adding', modules[c]);
+				var p = './modules/' + modules[c] + '/app.js';
+				
+				
+				var requireIfExists = function( path ) {
+					return function( exists ) {
+						if( exists ) {
+							var v = require( path );
+						}
+					};
+				};
+				require('path').exists(p, requireIfExists(p));					
 				app.modules.add(modules[c], app, stepObj.parallel());
+				
 			}
         };
         loadModules(options.sharedModules, this);
@@ -59,7 +71,7 @@ exports.serve = function(options) {
             loadModules(options.views[view].modules, this);
         }
     },
-    function loadView() {
+    function loadView(error) {
         for (view in options.views) {
             new exports.view(options.views[view], options);
         }
@@ -121,52 +133,51 @@ exports.view = function(options, allOptions) {
             var getSelectors = function(app, mod, that) {
                 return function(err, data) {
 	                if ( typeof app.modules[mod] != "undefined" && typeof app.modules[mod].getSelectors != "undefined" ) {
-						app.modules[mod].getSelectors( that.parallel() );
+						app.modules[mod].getSelectors( req.params, that.parallel() );
 					}
                 }
             };
+			/*
+				so we can return null when getSelectors does not exist.
+			*/
+			var emptyCallback = function(callback) {
+				callback(null, null);
+			};
 
             var getModuleSelectors = function() {
+				var modules = allOptions.sharedModules.concat( options.modules );
+				this.modules = modules;
 				var that = this;
-                var modules = allOptions.sharedModules.concat(options.modules);
                 var c = modules.length;
-				var out = [];
-                while (c--) {
+                while ( c-- ) {
                     var mod = modules[c];
                     if ( typeof app.modules[mod] != "undefined" && typeof app.modules[mod].getSelectors != "undefined" ) {
 	                     getSelectors(app, mod, that)();
                     }else {
-						that.parallel()();
+						emptyCallback( that.parallel() );
 					}
                 }
             }
 
-			stepsA.push(getModuleSelectors);
-
-            var doRender = function(err, data, data2) {
-				console.log('>>');
+			stepsA.push( getModuleSelectors );
 	
-				if(err){
-					console.log('ERROR: ', err[0].message);
+            var doRender = function( error ) {
+				var modules = this.modules.reverse();
+				var out = {};
+				var c = arguments.length;
+				while( c-- ){ // mix aguments with data to create {'flickr': {'img': 'blahs'}}
+					if( c === 0 ) continue  // skip the error message
+					out[ modules[ c-1 ] ] = arguments[ c ];
 				}
-				if(data && data2){
-					var out = {
-						'flickr': data,
-						'flickr2': data2
-					};
-				}else {
-					var out = {};
-				}
-				var selectors = buildSelectors(out, options, allOptions);
-                res.render(__dirname + '/views/' + options.view + '/' + options.view + format, {
+                res.render( __dirname + '/views/' + options.view + '/' + options.view + format, {
                     layout: layout,
                     classifyKeys: false,
-                    selectors: selectors
+                    selectors: buildSelectors( out, options, allOptions )
                 });
             };
-            stepsA.push(doRender);
+            stepsA.push( doRender );
 
-            Step.apply(this, stepsA);
+            Step.apply( this, stepsA );
         });
     }
 

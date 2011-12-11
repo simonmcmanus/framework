@@ -20,13 +20,13 @@ structure.serve({
 				'content'
 			]	
 		},
-		
 		photo:  {
 			url: '/photo/:photo',
 			view: 'photo',
 			modules: [
 				'mainNav',
-				'content'
+				'content',
+				'photo'
 			]
 		},
 		
