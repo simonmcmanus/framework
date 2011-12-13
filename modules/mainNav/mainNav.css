@@ -1,9 +1,10 @@
 #mainNav ul {
+margin: 10px 10px 35px 10px;
 }
 
 #mainNav ul li{
-	padding:1em;
-	margin:1em;
+	padding:10px;
+	margin: 10px;
 	background:#fff;
 	color:#fff;
 	display:inline;

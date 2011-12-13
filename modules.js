@@ -36,7 +36,6 @@ exports.add = function( moduleName, app, callback ) {
 	Step(
 		function readFiles() {
 			var file = app.set( 'dirname' ) + MODULES_DIRECTORY + '/' + moduleName + '/' + moduleName;
-			console.log(file);
 			fs.readFile( file + '.html', 'utf8', this.parallel() );
 			fs.readFile( file + '.css', 'utf8', this.parallel() );
 			fs.readFile( file + '.js', 'utf8', this.parallel() );

@@ -1,7 +1,7 @@
 var fs = require('fs');
 var jsdom = require("jsdom");
 var express = require('express');
-var app = express.createServer();
+var app = express.createServer( express.static(__dirname + "/public") );
 var sizlate = require('sizlate');
 app.modules = require('./modules.js');
 
@@ -23,8 +23,9 @@ app.views['photo'] = {
 
 
 app.configure(function() {
-    app.set('view engine', 'html');
-    app.set('dirname', __dirname);
+	app.set('view engine', 'html');
+	app.set('dirname', __dirname);
+	app.use('/static', express.static(__dirname + '/static')); 
 });
 
 app.register('.html', sizlate);
@@ -36,6 +37,9 @@ jsdom.debugMode = true;
 
 exports.serve = function(options) {
 
+	express.static(__dirname + "/public")
+	
+	
     app.get('/layout.css',
     function(req, res) {
         res.download(app.set('dirname') + '/views/layout.css');
@@ -50,7 +54,6 @@ exports.serve = function(options) {
         var loadModules = function(modules, stepObj) {
 			var c = modules.length;
 			while (c--) {
-				//console.log('adding', modules[c]);
 				var p = './modules/' + modules[c] + '/app.js';
 				
 				
@@ -97,7 +100,7 @@ var buildSelectors = function(data, options, allOptions) {
 	            selectors['#' + options.modules[c]] = app.modules[options.modules[c]].html;
             }
         }
-        selectors['script#structureOptions'] = 'var options = ' + JSON.stringify(allOptions);
+        selectors['script#structureOptions'] = 'var structure = { options: ' + JSON.stringify(allOptions) + ' }';
         return selectors;
     }
 };
@@ -124,10 +127,14 @@ exports.view = function(options, allOptions) {
         );
     };
 
-    var buildView = function(format, layout) {
+    var buildView = function(format) {
 	
-        app.get(options.url + format,
+        app.get(options.url + '.:format?',
         function(req, res, next) {
+			if(typeof req.params.format != 'undefined'  && req.params.format != 'html' ){
+				next();
+				return false;
+			}
             var stepsA = [];
             //	Returns a function to be added to a steps array.
             var getSelectors = function(app, mod, that) {
@@ -170,10 +177,11 @@ exports.view = function(options, allOptions) {
 					out[ modules[ c-1 ] ] = arguments[ c ];
 				}
                 res.render( __dirname + '/views/' + options.view + '/' + options.view + format, {
-                    layout: layout,
+                    layout: (req.params.format != 'html' ), /*layout false if format is .html */
                     classifyKeys: false,
                     selectors: buildSelectors( out, options, allOptions )
                 });
+				return false;
             };
             stepsA.push( doRender );
 
@@ -218,8 +226,8 @@ exports.view = function(options, allOptions) {
 
     var init = function(options) {
         getFiles(options.view);
-        buildView('', true);
-        buildView('.html', false);
+//        buildView('');
+        buildView('.html');
         app.get(options.url + '.css', fetchModuleTypeWrapper('css', options.view));
         app.get(options.url + '.js', fetchModuleTypeWrapper('js', options.view));
     };

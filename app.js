@@ -1,6 +1,6 @@
 var structure = require('./structure.js');
 structure.serve({
-	port: 82,
+	port: 83,
 	static: '/static',
 	sharedModules: ['shared'],
 	views: {
@@ -32,7 +32,7 @@ structure.serve({
 		
 		/* the url at least has to be the same as the obj key - this is a bug*/
 		
-		harry:  {
+		harry: {
 			url: '/harryDog',
 			view: 'harryDog',
 			modules: [
