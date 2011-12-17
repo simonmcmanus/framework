@@ -41,6 +41,7 @@ structure.serve({
 
 /*
 
+
 Example resources!?:
 
 /contact.html

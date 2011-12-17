@@ -70,13 +70,13 @@ exports.serve = function(options) {
 			}
         };
         loadModules(options.sharedModules, this);
-        for (view in options.views) {
-            loadModules(options.views[view].modules, this);
+        for (view in options.resources) {
+            loadModules(options.resources[view].modules, this);
         }
     },
     function loadView(error) {
-        for (view in options.views) {
-            new exports.view(view, options);
+        for (resource in options.resources) {
+            new exports.view(resource, options);
         }
     }
     );    
@@ -110,7 +110,7 @@ exports.view = function(view, options) {
     var getFiles = function(view, options) {
         Step(
         function getFiles() {
-            var viewPath = app.set('dirname') + '/views/' + options.views[view].view + '/' + options.views[view].view;
+            var viewPath = app.set('dirname') + '/views/' + options.resources[view].view + '/' + options.resources[view].view;
             fs.readFile(viewPath + '.html', 'utf8', this.parallel());
             fs.readFile(viewPath + '.css', 'utf8', this.parallel());
             fs.readFile(viewPath + '.js', 'utf8', this.parallel());
@@ -149,7 +149,7 @@ exports.view = function(view, options) {
 			};
 
             var getModuleSelectors = function() {
-				var modules = options.sharedModules.concat( options.views[view].modules );
+				var modules = options.sharedModules.concat( options.resources[view].modules );
 				this.modules = modules;
 				var that = this;
                 var c = modules.length;
@@ -174,10 +174,10 @@ exports.view = function(view, options) {
 					out[ modules[ c-1 ] ] = arguments[ c ];
 				}
 				console.log(options);
-                res.render( __dirname + '/views/' + options.views[view].view + '/' + options.views[view].view + format, {
+                res.render( __dirname + '/views/' + options.resources[view].view + '/' + options.resources[view].view + format, {
                     layout: (req.params.format != 'html' ), /*layout false if format is .html */
                     classifyKeys: false,
-                    selectors: buildSelectors( out, options.views[view], options, options.views[view].view )
+                    selectors: buildSelectors( out, options.resources[view], options, options.resources[view].view )
                 });
 				return false;
             };
@@ -193,7 +193,7 @@ exports.view = function(view, options) {
 		type - eg. css or js
 	*/
     var fetchModuleType = function(type, view) {
-        var modules = options.views[view].modules;
+        var modules = options.resources[view].modules;
         var c = modules.length;
         var out = [];
 
