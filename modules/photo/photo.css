@@ -1,0 +1,12 @@
+#photo div.loading {
+	background-image:url(http://www.kohactive.com/assets/images/loading.gif);
+	background-repeat:no-repeat;
+	width:auto;
+}
+#photo img {
+	display:inline;
+}
+#photo .info {
+	display:inline-block;
+	vertical-align:top;
+}

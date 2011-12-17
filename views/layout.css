@@ -1,0 +1,47 @@
+body {
+	color:#ddd;
+	background:#222;
+	background-image: url(http://farm3.staticflickr.com/2363/1974323885_4d489293a1_o.jpg);
+	background-position:0em 2em;
+	padding: 2em;
+
+	font-family: 'AaarghNormal';
+	}
+
+
+h1 {
+	font: 60px/68px 'XenophoneRegular',Arial,sans-serif;
+	letter-spacing: 0;
+}
+h3 {
+	background: rgba(30, 30,30, 0.4);
+	padding:5px 10px ;
+}
+#container {
+	background: rgba(30, 30,30, 0.4);
+	padding: 0;
+	margin: 10px;
+	min-height:500px;
+}
+
+a {
+	text-decoration:none;
+}
+
+ul {
+	margin:0;
+	padding:0;
+}
+
+#hiddenDiv {
+	left: 10000px;
+	position: absolute;
+	
+}
+#hiddenDiv .hiddenRel{
+	position: relative;
+}
+
+#container .inactive {
+	display:none;
+}
