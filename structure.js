@@ -76,17 +76,16 @@ exports.serve = function(options) {
     },
     function loadView(error) {
         for (view in options.views) {
-            new exports.view(options.views[view], options);
+            new exports.view(view, options);
         }
     }
-    );
-    
+    );    
     app.listen(options.port);
 };
 
 
 // if no selectors are specified create selectors with the ids from the module names on the view/layout specified.
-var buildSelectors = function(data, options, allOptions) {
+	var buildSelectors = function(data, options, allOptions, view) {
     if (options.selectors) {
         // TODO: should really be merged with the below.
         return options.selectors;
@@ -100,19 +99,18 @@ var buildSelectors = function(data, options, allOptions) {
 	            selectors['#' + options.modules[c]] = app.modules[options.modules[c]].html;
             }
         }
-        selectors['script#structureOptions'] = 'var structure = { options: ' + JSON.stringify(allOptions) + ' }';
+        selectors['script#structureOptions'] = 'var structure = { options: ' + JSON.stringify(allOptions) + ' }; structure.views = { active: "'+ view +'" };';
         return selectors;
     }
 };
 // TODO _ remove allOptions - its hacky
-exports.view = function(options, allOptions) {
+exports.view = function(view, options) {
     var that = this;
 
-
-    var getFiles = function(view) {
+    var getFiles = function(view, options) {
         Step(
         function getFiles() {
-            var viewPath = app.set('dirname') + '/views/' + view + '/' + view;
+            var viewPath = app.set('dirname') + '/views/' + options.views[view].view + '/' + options.views[view].view;
             fs.readFile(viewPath + '.html', 'utf8', this.parallel());
             fs.readFile(viewPath + '.css', 'utf8', this.parallel());
             fs.readFile(viewPath + '.js', 'utf8', this.parallel());
@@ -127,10 +125,9 @@ exports.view = function(options, allOptions) {
         );
     };
 
-    var buildView = function(format) {
-	
-        app.get(options.url + '.:format?',
-        function(req, res, next) {
+    var buildView = function(view, format) {
+
+        app.get(view + '.:format?', function(req, res, next) {
 			if(typeof req.params.format != 'undefined'  && req.params.format != 'html' ){
 				next();
 				return false;
@@ -152,7 +149,7 @@ exports.view = function(options, allOptions) {
 			};
 
             var getModuleSelectors = function() {
-				var modules = allOptions.sharedModules.concat( options.modules );
+				var modules = options.sharedModules.concat( options.views[view].modules );
 				this.modules = modules;
 				var that = this;
                 var c = modules.length;
@@ -176,10 +173,11 @@ exports.view = function(options, allOptions) {
 					if( c === 0 ) continue  // skip the error message
 					out[ modules[ c-1 ] ] = arguments[ c ];
 				}
-                res.render( __dirname + '/views/' + options.view + '/' + options.view + format, {
+				console.log(options);
+                res.render( __dirname + '/views/' + options.views[view].view + '/' + options.views[view].view + format, {
                     layout: (req.params.format != 'html' ), /*layout false if format is .html */
                     classifyKeys: false,
-                    selectors: buildSelectors( out, options, allOptions )
+                    selectors: buildSelectors( out, options.views[view], options, options.views[view].view )
                 });
 				return false;
             };
@@ -195,7 +193,7 @@ exports.view = function(options, allOptions) {
 		type - eg. css or js
 	*/
     var fetchModuleType = function(type, view) {
-        var modules = options.modules;
+        var modules = options.views[view].modules;
         var c = modules.length;
         var out = [];
 
@@ -205,6 +203,7 @@ exports.view = function(options, allOptions) {
         }
         if (type == "js") {
             // for js modueles need to extend the view
+			console.log('aaa', app.views[view] , view);
             if (app.views[view]) {
                 out.unshift(app.views[view][type]);
                 out.unshift('/* ' + type + ' From View:' + view + ' */');
@@ -224,15 +223,15 @@ exports.view = function(options, allOptions) {
         }
     }
 
-    var init = function(options) {
-        getFiles(options.view);
+    var init = function(view, options) {
+        getFiles(view, options);
 //        buildView('');
-        buildView('.html');
-        app.get(options.url + '.css', fetchModuleTypeWrapper('css', options.view));
-        app.get(options.url + '.js', fetchModuleTypeWrapper('js', options.view));
+        buildView(view, '.html');
+        app.get(view + '.css', fetchModuleTypeWrapper('css', view));
+        app.get(view + '.js', fetchModuleTypeWrapper('js', view));
     };
 
-    init(options);
+    init(view, options);
 };
 
 

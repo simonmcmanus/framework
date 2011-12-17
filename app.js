@@ -3,25 +3,22 @@ structure.serve({
 	port: 83,
 	static: '/static',
 	sharedModules: ['shared'],
-	views: {
-		contact:  {
-			url: '/contactMe',
+	resources: {
+		'/contact':  {
 			view: 'contactMe',
 			modules: [
 				'mainNav',
 				'content'
 			]
 		},
-		home:  {
-			url: '/home',
+		'/home':  {
 			view: 'home',
 			modules: [
 				'mainNav',
 				'content'
 			]	
 		},
-		photo:  {
-			url: '/photo/:photo',
+		'/photo/:photo':  {
 			view: 'photo',
 			modules: [
 				'mainNav',
@@ -29,11 +26,7 @@ structure.serve({
 				'photo'
 			]
 		},
-		
-		/* the url at least has to be the same as the obj key - this is a bug*/
-		
-		harry: {
-			url: '/harryDog',
+		'/photos': {
 			view: 'harryDog',
 			modules: [
 				'mainNav',
@@ -44,3 +37,16 @@ structure.serve({
 		}
 	}
 });
+
+
+/*
+
+Example resources!?:
+
+/contact.html
+/contact.xml
+/contact.rss
+/contact.css
+/contact.js
+
+*/
