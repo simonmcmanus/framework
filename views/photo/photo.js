@@ -2,12 +2,21 @@
 structure.views.photo = function() {
 	var that = this;
 	that.domNode = $('#container div[data-view="photo"]'); // set domNode
+	
+	that.hide = function(options, callback) {
+		console.log('photo hide');
+		$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
+		if(callback){
+			callback();
+		}
+	};
 	that.show = function(startPos) {
+		console.log('photo show');
+		
 		
 		var $html = $(structure.views.photo.html)
 		$html.removeClass('inactive').addClass('active');
 		var $hiddenDiv = $html.appendTo($('#hiddenDiv #hiddenRel'));
-		console.log('',$hiddenDiv);
 		$hiddenDiv.find('img').bind('load', function() {
 			var h = $(this).height();
 			var w = $(this).width();
@@ -30,6 +39,9 @@ structure.views.photo = function() {
 				left: $('#container').position().left
 			}, 400, function() {
 				$(this).css('position', 'static');
+				
+				
+				
 			});
 		});		
 	};

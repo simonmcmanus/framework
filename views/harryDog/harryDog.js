@@ -2,15 +2,24 @@ structure.views.harryDog = function() {
 	var that = this;
 	that.init($('#container div[data-view="harryDog"]')); // set domNode
 	
+	
+	
+	that.show = function(options, callback) {
+		console.log('harryDog show');
+		$('#container div[data-view="harryDog"]').removeClass('inactive').addClass('active').show();
+		$('#flickr a, #flickr2 a').css({'position': 'relative', marginLeft: 0, left: 0, top: 0});
+		if(callback) {
+			callback();
+		}
+	};
 	that.hide = function(options, callback) {
+		console.log('harryDog Hide');
 		var $clicked = $(options.clicked);
-		$('h3').fadeOut('slow');
-					var $keeper = $clicked; 
+		var $keeper = $clicked; 
 
 			var DURATION = 200; 
 			var href = $clicked.attr('href').split('/');
 			structure.views.Base.get(href[1] + '/' + href[2], function() {
-				$('h3').fadeOut('slow');
 				var left = $keeper.offset().left;
 				var top = $keeper.position().top;
 				var o  = {
@@ -26,14 +35,17 @@ structure.views.harryDog = function() {
 					left: '-100px' 
 				}, DURATION);
 				setTimeout(function() {
-						var endPos = {
-							top: top,
-							left: left
-						};
+					var endPos = {
+						top: top,
+						left: left
+					};
 					$('#container .active').addClass('inactive').removeClass('active');
 					structure.views.photo.show(endPos);	
 					structure.views.photo.switch('photo', $keeper.attr('href'));
+						
 				}, DURATION/2);
+				
+				that.domNode.hide();
 			});
 		
 	};
