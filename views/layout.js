@@ -8,19 +8,20 @@ var getViewFromUrl = function(url) {
 
 
 structure.views.Base = {
-	init: function() {
+	init: function($domNode) {
+		this.domNode = $domNode;
 	},
 	destroy: function() {
 		//		delete this.domNode;
 	},
 	show: function() {
 		// remove class inactive.
+		console.log('SHOW ');
+		$('[data-url].inactive').show();
 		this.domNode.hide().fadeIn('slow');
 	},
 	hide: function(callback) {
-
 		this.domNode.fadeOut('slow', callback);
-		
 		// add class in active 
 	}, 
 	showModules: function(callback) {
@@ -33,17 +34,15 @@ structure.views.Base = {
 //		structure.views..hide();
 		structure.views.active = structure.views[newView];
 		window.history.pushState(undefined, newView, href);
-		
 		structure.views.active.show();
-		
 	},
 	setActive: function(view) {
 		structure.views.active = views[view];
-	}, 
+	},
 	get: function(view, callback) {
 		fetchView(view, callback);
-		
 		// wrap returned 
+		// add inactive to wrapped. 
 	}
 };
 
@@ -54,6 +53,8 @@ structure.views.Base = {
 
 
 $(document).ready(function() {
+	
+	$('#container ').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');
 //	structure.views.active = window.location.pathname.split('/')[1]; // set the view - hacky
 	$('a[data-view]').click(function(e) {
 		e.preventDefault();
@@ -93,33 +94,21 @@ $(document).ready(function() {
 });
 
 
-var app = new routes();
 
 
 /*
-
 Auto generates leviroutes pop state listeners. 
-
 */
+var app = new routes();
 for(resource in structure.options.resources){
 	var wrapper = function(resourceView) {
 		return function(req) {
-			console.log('ddd', structure.views[resourceView]);
-
-			
-			// get the view 
-			// we are not updating the container domNode - that is hte problem. 
-			// then show the view.
+		//	structure.views.active.hide();
 			structure.views[resourceView].show();
-			//alert('popstate'+resourceView);
 		}
 	};
-
-
 	app.get(resource, wrapper(structure.options.resources[resource].view));
 }
-
-var cache = {};
 
 var fetchView = function(url, callback) {
 	var viewArr = url.split('/');
@@ -131,7 +120,7 @@ var fetchView = function(url, callback) {
 
 	var count = 1;
 	var checkCallback = function(count, callback) {
-		if(count == 3) {  // hacky - should be 3 - callback for js not working.
+		if(count == 3) { 
 			callback();
 		}
 	};
@@ -157,7 +146,7 @@ var fetchView = function(url, callback) {
 			if(!structure.views[viewName]){
 				structure.views[viewName] = {};
 			}
-			structure.views[viewName].html = '<div id="' + url + '" class="inactive">' + data + '</div>';
+			structure.views[viewName].html = '<div data-url="' + url + '" data-view="' + viewName + '" class="inactive">' + data + '</div>';
 			checkCallback( count++ , callback );
 		}
 	});

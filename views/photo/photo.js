@@ -1,14 +1,11 @@
 
-structure.views.photo	 = function() {
+structure.views.photo = function() {
 	var that = this;
-	var init = function() {
-		that.domNode = $('#container');
-	};
-	init();
+	that.domNode = $('#container div[data-view="photo"]'); // set domNode
 	that.show = function(startPos) {
 		
 		var $html = $(structure.views.photo.html)
-		
+		$html.removeClass('inactive').addClass('active');
 		var $hiddenDiv = $html.appendTo($('#hiddenDiv #hiddenRel'));
 		console.log('',$hiddenDiv);
 		$hiddenDiv.find('img').bind('load', function() {
@@ -34,30 +31,11 @@ structure.views.photo	 = function() {
 			}, 400, function() {
 				$(this).css('position', 'static');
 			});
-		});;
-	
-//		var wrapper = $('<span></span>').css('border', '2px solid blue');
-//		$img.css();
-//		$img.fadeOut();
-/*
-	$img.animate({
-		width: '200px',
-		height: '300px',
-		top: 40, 
-		left: 20
-	}, 400);
-	
-	*/
-		
-	
-		
+		});		
 	};
 };
 
 
 structure.views.photo.prototype =  structure.views.Base;
-// TODO - should be an event. 
-$(document).ready(function() {
-	structure.views.photo = new structure.views.photo();
-});
+structure.views.photo = new structure.views.photo();
 //views.contactMe.prototype.constructor = views.Base;

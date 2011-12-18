@@ -1,6 +1,6 @@
 structure.views.harryDog = function() {
 	var that = this;
-	this.domNode = $('#container');
+	that.init($('#container div[data-view="harryDog"]')); // set domNode
 	
 	that.hide = function(options, callback) {
 		var $clicked = $(options.clicked);
@@ -30,6 +30,7 @@ structure.views.harryDog = function() {
 							top: top,
 							left: left
 						};
+					$('#container .active').addClass('inactive').removeClass('active');
 					structure.views.photo.show(endPos);	
 					structure.views.photo.switch('photo', $keeper.attr('href'));
 				}, DURATION/2);
