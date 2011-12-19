@@ -1,9 +1,9 @@
 
 
 $(document).ready(function() {
-	
+	// order of the below matters.
+	$('#container ').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');	
 	structure.views.Base.setActive(structure.views.active); // turn string into reference to real view obj.
-	$('#container ').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');
 	$('a[data-view]').click(function(e) {
 		e.preventDefault();
 		var newView = $(this).attr('data-view');
@@ -29,7 +29,7 @@ for(resource in structure.options.resources){
 		return function(req) {
 			// should not call switch if page is being loaded for the first time.
 			console.log('popstate called');
-			structure.views.active.show();
+		//	structure.views.active.show();
 /*
 			console.log(arguments);
 			structure.views.active.switch({
@@ -44,7 +44,10 @@ for(resource in structure.options.resources){
 
 structure.views.Base = {
 	init: function($domNode) {
-		this.domNode = $domNode;
+		var that = this;
+		$(document).ready(function() {
+			that.domNode = $domNode;
+		});
 	},
 	destroy: function() {
 		//		delete this.domNode;
@@ -70,21 +73,18 @@ structure.views.Base = {
 	*/
 	switch: function(options) {
 		var that = this;
-		options = {
-			to: options.to, 
-			href: options.href,
-			doPushState: options.doPushState || true
-		};
-		
 		this.get(options.href, function() {
 			that.setActive( that.getViewFromResource( options.to ) );
 			if(options.doPushState != false){
 				console.log('doing push state');
 				that.pushState(options.state, options.to, options.href);
 			}
-			structure.views.active.show();
+			
+			$.publish('VIEW_SWITCH', options);
+//			structure.views.active.show();
 			
 		});
+		console.log('options are: ', options);
 		structure.views.active.hide(options);
 	},
 	setActive: function(view) {
@@ -106,7 +106,11 @@ structure.views.Base = {
 		console.log('get view', view);
 		this.fetchView(view, callback);
 	},
+	append: function(html) {
+		$('#container').append(html);	
+	},
 	fetchView: function(url, callback) {
+		var that = this;
 		console.log('fetch view', url);
 		
 		
@@ -114,40 +118,65 @@ structure.views.Base = {
 		var viewArr = url.split('/');
 		if(viewArr[0])	{// hacky
 			var viewName = viewArr[0];	
-		}else {
-			var ViewName = url;
+		} else if (viewArr[1]){ // meh
+			var viewName = viewArr[1];	
+		} else {
+			var viewName = url;
 		}
-
+		
 		var count = 1;
 		var checkCallback = function(count, callback) {
 			if(count == 3) { 
 				callback();
 			}
 		};
-
-		// load script
 		$.getScript(  url + '.js', 
 			function() {
 				checkCallback( count++ , callback );
 			}
 		);
-		// load css 
 		$.ajax({
 			url:  url + '.css', 
 			success: function(data) {
 				checkCallback( count++ , callback );
 			}
 		});
-		// load html
 		$.ajax({
 			url:   url + '.html', 
 			success: function(data) {
 				if(!structure.views[viewName]){
 					structure.views[viewName] = {};
 				}
-				structure.views[viewName].html = '<div data-url="' + url + '" data-view="' + viewName + '" class="inactive">' + data + '</div>';
+				structure.views[viewName].html = that.wrapView(url, viewName, data);
 				checkCallback( count++ , callback );
 			}
 		});
+	}, 
+	wrapView: function(url, viewName, data) {
+		return '<div data-url="' + url + '" data-view="' + viewName + '" class="inactive">' + data + '</div>';
 	}
 };
+
+
+
+(function($) {
+
+  var o = $({});
+
+	var events = {
+		VIEW_SWITCH: 'Called when the first view is hidden and its about to show the new view',
+	};
+
+  $.subscribe = function() {
+    o.on.apply(o, arguments);
+  };
+
+  $.unsubscribe = function() {
+    o.off.apply(o, arguments);
+  };
+
+  $.publish = function() {
+    o.trigger.apply(o, arguments);
+  };
+
+}(jQuery))

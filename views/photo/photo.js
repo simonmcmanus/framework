@@ -1,7 +1,7 @@
 
 structure.views.photo = function() {
 	var that = this;
-	that.domNode = $('#container div[data-view="photo"]'); // set domNode
+ 	that.init($('#container div[data-view="photo"]')); // set domNode
 	
 	that.hide = function(options, callback) {
 		console.log('photo hide');
@@ -16,9 +16,9 @@ structure.views.photo = function() {
 			callback();
 		}
 	};
-	that.show = function(startPos) {
-		console.log('photo show');
-		
+	that.show = function(options) {
+		console.log('photo show', options);
+		var $clicked = $(options.clicked);
 		
 		var $html = $(structure.views.photo.html)
 		$html.removeClass('inactive').addClass('active');
@@ -31,8 +31,8 @@ structure.views.photo = function() {
 			$(this).css({
 				height:'75',
 				width: 75,
-				left: startPos.left, 
-				top: startPos.top,
+				left: $clicked.css('left'), 
+				top: $clicked.css('top'),
 				position: 'absolute'
 			});
 			$('#container .active').addClass('inactive').removeClass('active');	//
@@ -52,6 +52,13 @@ structure.views.photo = function() {
 			});
 		});		
 	};
+	
+	
+	
+	$.subscribe('VIEW_SWITCH', function(e, options) {
+		console.log(arguments);
+		that.show(options);
+	});
 };
 
 
