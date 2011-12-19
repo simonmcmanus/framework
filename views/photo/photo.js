@@ -5,7 +5,13 @@ structure.views.photo = function() {
 	
 	that.hide = function(options, callback) {
 		console.log('photo hide');
-		$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
+		$('#container div[data-view="photo"] img').animate({
+			width: 75,
+			height: 75,
+		}, 100, function() {
+			$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
+			
+		});
 		if(callback){
 			callback();
 		}
@@ -29,7 +35,8 @@ structure.views.photo = function() {
 				top: startPos.top,
 				position: 'absolute'
 			});
-			
+			$('#container .active').addClass('inactive').removeClass('active');	//
+
 			$html.wrap('<div id="'+ window.location.pathname +'"></div>');
 			$('#container').append($html);
 			$(this).animate({
