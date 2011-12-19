@@ -34,12 +34,9 @@ ul {
 }
 
 #hiddenDiv {
-	left: 10000px;
-	position: absolute;
 	
 }
 #hiddenDiv .hiddenRel{
-	position: relative;
 }
 
 #container .inactive {

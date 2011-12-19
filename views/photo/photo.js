@@ -19,9 +19,10 @@ structure.views.photo = function() {
 	that.show = function(options) {
 		console.log('photo show', options);
 		var $clicked = $(options.clicked);
-		
 		var $html = $(structure.views.photo.html)
 		$html.removeClass('inactive').addClass('active');
+		console.log('dn', that.domNode);
+		return;
 		var $hiddenDiv = $html.appendTo($('#hiddenDiv #hiddenRel'));
 		$hiddenDiv.find('img').bind('load', function() {
 			var h = $(this).height();
@@ -46,11 +47,8 @@ structure.views.photo = function() {
 				left: $('#container').position().left
 			}, 400, function() {
 				$(this).css('position', 'static');
-				
-				
-				
 			});
-		});		
+		});
 	};
 	
 	

@@ -1,11 +1,57 @@
 
 
+
+structure.pages = {
+	
+};
+
+structure.pageManager = function() {
+	this.active = "";
+
+	this.get = function(url, view) {
+		// go get the view, 
+	};
+	
+	this.new = function() {
+		
+	};
+	
+	this.setActive = function(page) {
+		this.active = page;
+	};
+	this.wrap = function() {
+
+	};
+	this.wrapExisting = function() {
+		$('#container').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');
+	};
+	this.wrapString =  function(url, viewName, data) {
+		return '<div data-url="' + url + '" data-view="' + viewName + '" class="inactive">' + data + '</div>';
+	};
+	
+	$(document).ready(function() {
+		this.wrapExisting();
+	})
+};
+
+
+
+
+
 $(document).ready(function() {
 	// order of the below matters.
-	$('#container ').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');	
+
+
+	// INIT NEW VIEW HERE
+	$('#container').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');
+
+
+	// load file 
+
 	structure.views.Base.setActive(structure.views.active); // turn string into reference to real view obj.
 	$('a[data-view]').click(function(e) {
 		e.preventDefault();
+		// INIT NEW VIEW HERE - WE NEED TO GO AND GET THE HTML
 		var newView = $(this).attr('data-view');
 		structure.views.Base.switch({
 			to: newView, 
@@ -45,9 +91,21 @@ for(resource in structure.options.resources){
 structure.views.Base = {
 	init: function($domNode) {
 		var that = this;
+		
+		// we should not do this on document ready becuase it wont be fired when we load in new bits ajaxically.f
+		
+		
+		// do we have a the domNode
+		// do we have the html fragment?
+		
+		// we actually want this to happen ever time we load in a new view or 3 
+		this.setupDomNode();
 		$(document).ready(function() {
 			that.domNode = $domNode;
 		});
+	},
+	setupDomNode: function() {
+		console.log("active: ", 	structure.views.active)
 	},
 	destroy: function() {
 		//		delete this.domNode;
