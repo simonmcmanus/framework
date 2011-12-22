@@ -3,7 +3,7 @@ structure.serve({
 	port: 83,
 	static: '/static',
 	sharedModules: ['shared'],
-	resources: {
+	pageSpecs: {
 		'/contact':  {
 			view: 'contactMe',
 			modules: [

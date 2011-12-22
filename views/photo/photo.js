@@ -1,6 +1,7 @@
 
 structure.views.photo = function() {
 	var that = this;
+	// we should 
  	that.init($('#container div[data-view="photo"]')); // set domNode
 	
 	that.hide = function(options, callback) {
@@ -21,7 +22,6 @@ structure.views.photo = function() {
 		var $clicked = $(options.clicked);
 		var $html = $(structure.views.photo.html)
 		$html.removeClass('inactive').addClass('active');
-		console.log('dn', that.domNode);
 		return;
 		var $hiddenDiv = $html.appendTo($('#hiddenDiv #hiddenRel'));
 		$hiddenDiv.find('img').bind('load', function() {

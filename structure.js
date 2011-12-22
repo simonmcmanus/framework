@@ -70,13 +70,13 @@ exports.serve = function(options) {
 			}
         };
         loadModules(options.sharedModules, this);
-        for (view in options.resources) {
-            loadModules(options.resources[view].modules, this);
+        for (pageSpec in options.pageSpecs) {
+            loadModules(options.pageSpecs[pageSpec].modules, this);
         }
     },
     function loadView(error) {
-        for (resource in options.resources) {
-            new exports.view(resource, options);
+        for (pageSpec in options.pageSpecs) {
+            new exports.view(pageSpec, options);
         }
     }
     );    
@@ -85,7 +85,7 @@ exports.serve = function(options) {
 
 
 // if no selectors are specified create selectors with the ids from the module names on the view/layout specified.
-	var buildSelectors = function(data, options, allOptions, view) {
+	var buildSelectors = function(data, options, allOptions, view, pageSpec) {
     if (options.selectors) {
         // TODO: should really be merged with the below.
         return options.selectors;
@@ -99,7 +99,7 @@ exports.serve = function(options) {
 	            selectors['#' + options.modules[c]] = app.modules[options.modules[c]].html;
             }
         }
-        selectors['script#structureOptions'] = 'var structure = { options: ' + JSON.stringify(allOptions) + ' }; structure.views = { active: "'+ view +'" };';
+        selectors['script#structureOptions'] = 'var structure = { options: ' + JSON.stringify(allOptions) + ' }; structure.views = { active: "'+ view +'" }; structure.pages = { active: "'+ pageSpec +'" }; ';
         return selectors;
     }
 };
@@ -110,7 +110,7 @@ exports.view = function(view, options) {
     var getFiles = function(view, options) {
         Step(
         function getFiles() {
-            var viewPath = app.set('dirname') + '/views/' + options.resources[view].view + '/' + options.resources[view].view;
+            var viewPath = app.set('dirname') + '/views/' + options.pageSpecs[view].view + '/' + options.pageSpecs[view].view;
             fs.readFile(viewPath + '.html', 'utf8', this.parallel());
             fs.readFile(viewPath + '.css', 'utf8', this.parallel());
             fs.readFile(viewPath + '.js', 'utf8', this.parallel());
@@ -149,7 +149,7 @@ exports.view = function(view, options) {
 			};
 
             var getModuleSelectors = function() {
-				var modules = options.sharedModules.concat( options.resources[view].modules );
+				var modules = options.sharedModules.concat( options.pageSpecs[view].modules );
 				this.modules = modules;
 				var that = this;
                 var c = modules.length;
@@ -173,16 +173,14 @@ exports.view = function(view, options) {
 					if( c === 0 ) continue  // skip the error message
 					out[ modules[ c-1 ] ] = arguments[ c ];
 				}
-				console.log(options);
-                res.render( __dirname + '/views/' + options.resources[view].view + '/' + options.resources[view].view + format, {
+                res.render( __dirname + '/views/' + options.pageSpecs[view].view + '/' + options.pageSpecs[view].view + format, {
                     layout: (req.params.format != 'html' ), /*layout false if format is .html */
                     classifyKeys: false,
-                    selectors: buildSelectors( out, options.resources[view], options, options.resources[view].view )
+                    selectors: buildSelectors( out, options.pageSpecs[view], options, options.pageSpecs[view].view, pageSpec )
                 });
 				return false;
             };
             stepsA.push( doRender );
-
             Step.apply( this, stepsA );
         });
     }
@@ -193,7 +191,7 @@ exports.view = function(view, options) {
 		type - eg. css or js
 	*/
     var fetchModuleType = function(type, view) {
-        var modules = options.resources[view].modules;
+        var modules = options.pageSpecs[view].modules;
         var c = modules.length;
         var out = [];
 
@@ -219,7 +217,7 @@ exports.view = function(view, options) {
 
     var fetchModuleTypeWrapper = function(type, view) {
         return function(req, res) {
-            res.send(fetchModuleType(type, view));
+			res.send(fetchModuleType(type, view));
         }
     }
 

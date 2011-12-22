@@ -1,60 +1,116 @@
 
 
 
-structure.pages = {
-	
+
+structure.specManager = {
+	getViewFromSpec: function(pageSpec) {
+		return structure.options.pageSpecs[pageSpec].view;
+	}
 };
 
-structure.pageManager = function() {
-	this.active = "";
+structure.pageManager = function(page) {
+	var scope = {};
+	
+	scope.pages = {};
+	var views = {};
+	var modules = {};
 
-	this.get = function(url, view) {
-		// go get the view, 
+	scope.active = page || structure.views.active ;
+
+	scope.get = function(url, pageSpec, callback) {
+		// check if we already have the domNode
+		
+		$node = $(scope.wrapString(url,  pageSpec));
+		$node.appendTo('#container');// setup domNode
+		$($node).load(url + '.html', function(data) { // go get contents 
+			scope.new(url, $node,  {})
+			if(callback){
+				callback();
+			}
+		});
+	};
+
+	scope.show = function(options) {
+		$('#container .active').fadeOut().removeClass('active');
+		scope.pages[options.href].show(options);
+		scope.setActive('');
 	};
 	
-	this.new = function() {
+	scope.getModuleFiles = function() {
 		
 	};
 	
-	this.setActive = function(page) {
-		this.active = page;
-	};
-	this.wrap = function() {
-
-	};
-	this.wrapExisting = function() {
-		$('#container').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');
-	};
-	this.wrapString =  function(url, viewName, data) {
-		return '<div data-url="' + url + '" data-view="' + viewName + '" class="inactive">' + data + '</div>';
+	scope.new = function(url, domNode, options) {
+		var pageSpec = $(domNode).attr('data-pageSpec');
+		scope.pages[url] = structure.views[structure.specManager.getViewFromSpec(pageSpec)]; // add view to the obj
+		return scope.pages[url].domNode = domNode;
 	};
 	
-	$(document).ready(function() {
-		this.wrapExisting();
-	})
+	scope.setActive = function(page) {
+		scope.active = page;
+	};
+	scope.wrapExisting = function() {
+		var $wrapper = $('<div data-url="'+ window.location.pathname +'" data-pageSpec="'+ structure.pages.active +'" class="resource active"></div>');
+		$('#container').children().wrapAll($wrapper);
+		return $wrapper;
+	};
+	scope.wrapString =  function(url, pageSpec, data) {
+		return '<div data-url="' + url + '" data-pageSpec="' + pageSpec + '" class="inactive">' + data || "" + '</div>';
+	};
+	
+	scope.pushState = function(state, title, url) {
+		window.history.pushState(state, title, url);
+	}
+	
+	
+	scope.switch = function(options) {
+		var c = 0;
+		var show = function(c) {
+			if(c==2){ // once we have hidden the active view and got the new view....
+				scope.show(options);
+			}
+		};
+		$('#container .active').fadeOut(200, function() {
+			c++;
+			show(c);
+		});
+		scope.get(options.href, options.pageSpec, function() {
+			c++;
+			show(c);
+		});
+	};
+
+	var createPageOnLoad = function(){
+		scope.setActive(window.location.pathname);
+		scope.new(scope.active, scope.wrapExisting(),  {});
+	};
+	createPageOnLoad();
+	return scope;
 };
+
+
+
 
 
 
 
 
 $(document).ready(function() {
+
 	// order of the below matters.
+	structure.pageManager = structure.pageManager();
 
-
-	// INIT NEW VIEW HERE
-	$('#container').children().wrapAll('<div data-url="'+ window.location.pathname +'" data-view="'+ structure.views.active +'" class="resource active"></div>');
 
 
 	// load file 
 
 	structure.views.Base.setActive(structure.views.active); // turn string into reference to real view obj.
-	$('a[data-view]').click(function(e) {
+	$('a[data-pagespec]').click(function(e) {
 		e.preventDefault();
 		// INIT NEW VIEW HERE - WE NEED TO GO AND GET THE HTML
-		var newView = $(this).attr('data-view');
-		structure.views.Base.switch({
-			to: newView, 
+		var newView = $(this).attr('data-pagespec');
+		structure.pageManager.switch({
+			pageSpec: newView, 
 			href: $(this).attr('href'),
 			clicked: this,
 			doPushState: true
@@ -70,7 +126,7 @@ $(document).ready(function() {
 Auto generates leviroutes pop state listeners. 
 */
 var app = new routes();
-for(resource in structure.options.resources){
+for(pageSpec in structure.options.pageSepcs){
 	var wrapper = function(resourceView) {
 		return function(req) {
 			// should not call switch if page is being loaded for the first time.
@@ -84,7 +140,7 @@ for(resource in structure.options.resources){
 		*/
 		}
 	};
-	app.get(resource, wrapper(structure.options.resources[resource].view));
+	app.get(resource, wrapper(structure.options.pageSpecs[pageSpec].view));
 }
 
 
@@ -105,18 +161,18 @@ structure.views.Base = {
 		});
 	},
 	setupDomNode: function() {
-		console.log("active: ", 	structure.views.active)
+		//console.log("active: ", 	structure.views.active)
 	},
 	destroy: function() {
 		//		delete this.domNode;
 	},
 	show: function() {
-		console.log('Base show');
+		//console.log('Base show');
 		// remove class inactive.
 		this.domNode.hide().fadeIn('slow');
 	},
 	hide: function(callback) {
-		console.log('Base hide');
+		//console.log('Base hide');
 		this.domNode.fadeOut('slow', callback);
 		// add class in active 
 	}, 
@@ -134,7 +190,7 @@ structure.views.Base = {
 		this.get(options.href, function() {
 			that.setActive( that.getViewFromResource( options.to ) );
 			if(options.doPushState != false){
-				console.log('doing push state');
+				//console.log('doing push state');
 				that.pushState(options.state, options.to, options.href);
 			}
 			
@@ -142,7 +198,7 @@ structure.views.Base = {
 //			structure.views.active.show();
 			
 		});
-		console.log('options are: ', options);
+		//console.log('options are: ', options);
 		structure.views.active.hide(options);
 	},
 	setActive: function(view) {
@@ -151,67 +207,10 @@ structure.views.Base = {
 			return false;
 		}else {
 			structure.views.active = structure.views[view];
-			console.log('set active', view, structure.views.active);
 		}
 	},
-	getViewFromResource: function(resource) {
-		return structure.options.resources[resource].view;
-	},
-	pushState: function(state, title, url) {
-		window.history.pushState(state, title, url);
-	},
-	get: function(view, callback) {
-		console.log('get view', view);
-		this.fetchView(view, callback);
-	},
-	append: function(html) {
-		$('#container').append(html);	
-	},
-	fetchView: function(url, callback) {
-		var that = this;
-		console.log('fetch view', url);
-		
-		
-		
-		var viewArr = url.split('/');
-		if(viewArr[0])	{// hacky
-			var viewName = viewArr[0];	
-		} else if (viewArr[1]){ // meh
-			var viewName = viewArr[1];	
-		} else {
-			var viewName = url;
-		}
-		
-		var count = 1;
-		var checkCallback = function(count, callback) {
-			if(count == 3) { 
-				callback();
-			}
-		};
-		$.getScript(  url + '.js', 
-			function() {
-				checkCallback( count++ , callback );
-			}
-		);
-		$.ajax({
-			url:  url + '.css', 
-			success: function(data) {
-				checkCallback( count++ , callback );
-			}
-		});
-		$.ajax({
-			url:   url + '.html', 
-			success: function(data) {
-				if(!structure.views[viewName]){
-					structure.views[viewName] = {};
-				}
-				structure.views[viewName].html = that.wrapView(url, viewName, data);
-				checkCallback( count++ , callback );
-			}
-		});
-	}, 
-	wrapView: function(url, viewName, data) {
-		return '<div data-url="' + url + '" data-view="' + viewName + '" class="inactive">' + data + '</div>';
+	getViewFromResource: function(pageSpec) {
+		return structure.options.pageSepcs[pageSpec].view;
 	}
 };
 
@@ -238,3 +237,49 @@ structure.views.Base = {
   };
 
 }(jQuery))
+
+
+
+
+
+
+
+structure.moduleManager = function() {
+
+	var init = function() {
+		// check for existing module domNodes.
+		// what do we do about css/js here? if its in the page it will already have been loaded.
+	};
+
+
+	// are modules specific to a view? we instantiate the module for the page? right? surely?
+	
+ 
+	/*
+		stores the modules html / css  and js 
+	*/
+	that.modules = {
+		sample: {
+			html: "",
+			css: "",
+			js: ""
+		}
+	};
+
+
+	that.get = function(moduleName) {
+		
+		
+		// was it loaded on the page already.
+		// do we already have the module
+		// if not get it 
+	};
+	
+	that.loadModules = function() {
+		
+	};
+	
+	that.loadModule = function() {
+		
+	};
+};
