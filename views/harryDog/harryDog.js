@@ -39,5 +39,4 @@ structure.views.harryDog = function() {
 };
 
 structure.views.harryDog.prototype =  structure.views.Base;
-structure.views.harryDog = new structure.views.harryDog();
 //views.contactMe.prototype.constructor = views.Base;

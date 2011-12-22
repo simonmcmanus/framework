@@ -31,9 +31,10 @@ structure.pageManager = function(page) {
 	};
 
 	scope.show = function(options) {
-		$('#container .active').fadeOut().removeClass('active');
+//		$('#container .active').fadeOut().removeClass('active');
 		scope.pages[options.href].show(options);
-		scope.setActive('');
+		console.log('s', scope.pages[options.href], scope.pages[options.href].domNode);
+		scope.setActive(scope.pages[options.href].domNode);
 	};
 	
 	scope.getModuleFiles = function() {
@@ -42,12 +43,18 @@ structure.pageManager = function(page) {
 	
 	scope.new = function(url, domNode, options) {
 		var pageSpec = $(domNode).attr('data-pageSpec');
-		scope.pages[url] = structure.views[structure.specManager.getViewFromSpec(pageSpec)]; // add view to the obj
-		return scope.pages[url].domNode = domNode;
+		
+		scope.pages[url] = new structure.views[structure.specManager.getViewFromSpec(pageSpec)](domNode);  // add view functions to the obj
+		
+		
+//		scope.pages[url] = structure.views[structure.specManager.getViewFromSpec(pageSpec)]; // add view functions to the obj
+		return scope.pages[url].domNode = domNode; 
 	};
 	
-	scope.setActive = function(page) {
-		scope.active = page;
+	scope.setActive = function(domNode) {
+//		$('#container .active').removeClass('active').addClass('inactive');
+//		domNode.addClass('active').removeClass('active');
+//		scope.active = page;
 	};
 	scope.wrapExisting = function() {
 		var $wrapper = $('<div data-url="'+ window.location.pathname +'" data-pageSpec="'+ structure.pages.active +'" class="resource active"></div>');
@@ -81,7 +88,7 @@ structure.pageManager = function(page) {
 	};
 
 	var createPageOnLoad = function(){
-		scope.setActive(window.location.pathname);
+//		scope.setActive(window.location.pathname);
 		scope.new(scope.active, scope.wrapExisting(),  {});
 	};
 	createPageOnLoad();

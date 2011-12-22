@@ -1,8 +1,9 @@
 
-structure.views.photo = function() {
+structure.views.photo = function(domNode) {
 	var that = this;
+	that.domNode = domNode;
 	// we should 
- 	that.init($('#container div[data-view="photo"]')); // set domNode
+ 	that.init(domNode); // set domNode
 	
 	that.hide = function(options, callback) {
 		console.log('photo hide');
@@ -10,7 +11,7 @@ structure.views.photo = function() {
 			width: 75,
 			height: 75,
 		}, 100, function() {
-			$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
+//			$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
 			
 		});
 		if(callback){
@@ -18,11 +19,10 @@ structure.views.photo = function() {
 		}
 	};
 	that.show = function(options) {
-		console.log('photo show', options);
 		var $clicked = $(options.clicked);
-		var $html = $(structure.views.photo.html)
-		$html.removeClass('inactive').addClass('active');
-		return;
+		var $html = that.domNode;
+		that.domNode.removeClass('inactive');
+		that.domNode.fadeIn();
 		var $hiddenDiv = $html.appendTo($('#hiddenDiv #hiddenRel'));
 		$hiddenDiv.find('img').bind('load', function() {
 			var h = $(this).height();
@@ -36,7 +36,7 @@ structure.views.photo = function() {
 				top: $clicked.css('top'),
 				position: 'absolute'
 			});
-			$('#container .active').addClass('inactive').removeClass('active');	//
+//			$('#container .active').addClass('inactive').removeClass('active');	//
 
 			$html.wrap('<div id="'+ window.location.pathname +'"></div>');
 			$('#container').append($html);
@@ -61,5 +61,4 @@ structure.views.photo = function() {
 
 
 structure.views.photo.prototype =  structure.views.Base;
-structure.views.photo = new structure.views.photo();
 //views.contactMe.prototype.constructor = views.Base;
