@@ -21,7 +21,8 @@ addRoutes = function( moduleName, app ) {
 	while(c--) {
 		var wrapperCallback = function( type ) { // to pass in type
 			return function( req, res ) {
-				res.send( exports[moduleName][type] );
+				console.log('nb;ah', moduleName,  exports[moduleName], exports[moduleName][type]);
+				res.send( exports[moduleName][type.slice(1)] );
 			}
 		};
 		app.get( '/' + moduleName + files[c], wrapperCallback( files[c] ) );

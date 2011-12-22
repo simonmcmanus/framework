@@ -32,16 +32,18 @@ exports.getSelectors = function( params, callback ) {
 			var photos  = json.photoset.photo;
 			var c = photos.length;
 			var selectors = {
-				a: []
+				'li': []
 			};
 			while(c--){
 				var url = 'http://farm' + photos[c].farm + '.staticflickr.com/' + photos[c].server + '/'  + photos[c].id + '_'  + photos[c].secret + '_s.jpg';
-				selectors.a.push({ 
-					href: '/photo/' + photos[c].id,
+				selectors['li'].push({ 
 					'selectors': {
 						img: {
 							'src': url,
 							'title': photos[c].title
+						},
+						a: {
+							href: '/photo/' + photos[c].id
 						}
 					}
 				 });

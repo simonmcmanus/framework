@@ -6,50 +6,67 @@ structure.views.photo = function(domNode) {
  	that.init(domNode); // set domNode
 	
 	that.hide = function(options, callback) {
-		console.log('photo hide', that.domNode);
-	//	that.domNode.addClass('inactive').removeClass('active');
-		that.domNode.find('img').animate({
-			width: 75,
-			height: 75,
-		}, 100, function() {
-			console.log(this);
-			//$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
-		});
+		var h = $('#container').css('height');
 		
-		
-		if(callback){
-			callback();
-		}
+		$('#container').css('height', h);
+		$clicked = $(options.clicked);
+		var $loading = $('<span class="loading">loading</span>');
+		$loading.css({
+			border: '2px solid red',
+			left: $clicked.position().left
+		})
+//		$clicked.append($loading);
+		that.domNode.find('#photo img').fadeOut('fast', callback);
 	};
+	
+	
+	
+	var showOtherPics = function() {
+		$('#flickr').css({
+			top: '5em',
+			position:'relative'
+		}).animate({
+			top: 0
+		});
+	};
+	
+	
 	that.show = function(options, callback) {
 		var $clicked = $(options.clicked);
-		var $html = that.domNode;
 		that.domNode.find('h3').hide().fadeIn('slow');
-		var $hiddenDiv = $html.appendTo($('#hiddenDiv #hiddenRel'));
-		$hiddenDiv.find('img').bind('load', function() {
+		that.domNode.find('#photo img').bind('load', function() {
 			var h = $(this).height();
 			var w = $(this).width();
 			var t = $(this).position().top;	 
 			var l = $(this).position().left;
+			console.log(h,w, t, l);
 			$(this).css({
 				height:'75',
 				width: 75,
-				left: $clicked.css('left'), 
-				top: $clicked.css('top'),
-				position: 'absolute'
+				left: $clicked.offset().left, 
+				top: $clicked.offset().top,
+				position: 'absolute',
+				border: '1px solid red'
 			});
-//			that.domNode.removeClass('inactive');
-//			$('#container .active').removeClass('active').addClass('inactive');
-
-			$html.wrap('<div id="'+ window.location.pathname +'"></div>');
-			$('#container').append($html);
+			$('#container .active').removeClass('active').addClass('inactive');			
+			that.domNode.addClass('active').removeClass('inactive');
+			
+			
+			$(this).attr('start-height', h);
+			$(this).attr('start-width', w);
+			
+			
 			$(this).animate({
 				width: w,
 				height: h,
 				top: $('#container').position().top+60,
 				left: $('#container').position().left
-			}, 1000, function() {
+			}, 1000, function() {		
 				$(this).css('position', 'static');
+				
+		//		$('#container .active').removeClass('active').addClass('inactive');
+		//		that.domNode.addClass('active').removeClass('inactive');
+				
 			});
 		});
 		if(callback) {

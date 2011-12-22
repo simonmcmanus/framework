@@ -50,12 +50,7 @@ structure.pageManager = function(page) {
 	};
 	
 	scope.activate = function(title, href, pageSpec) {
-		// set active var
-		// do pushState
-		structure.pageManager.pages[structure.state.url].domNode.addClass('inactive').removeClass('active');
 		structure.state.url = href;
-		console.log('s',structure.pageManager.pages[href].domNode);
-		structure.pageManager.pages[href].domNode.addClass('active').removeClass('inactive');
 		structure.state.spec = pageSpec;
 		scope.pageBindings(structure.pageManager.pages[href].domNode);
 		
@@ -91,7 +86,8 @@ structure.pageManager = function(page) {
 		
 		var show = function(c) {
 			if(c==2){ // once we have hidden the active view and got the new view....
-					scope.show(options, function() {
+				scope.show(options, function() {
+					console.log('DONE SHOW');
 					scope.activate( 'NO NEW TITLE', options.href, options.pageSpec);
 				});
 			}
@@ -112,6 +108,11 @@ structure.pageManager = function(page) {
 	scope.pageBindings = function(domNode){
 		if(domNode){
 			var $links = domNode.find('a[data-pagespec]');
+			
+			domNode.find('img').load(function() {
+			console.log('loaded', this);
+			});
+			
 		}else {
 			var $links = $('a[data-pagespec]');
 		}
@@ -127,6 +128,8 @@ structure.pageManager = function(page) {
 			});
 			return false;
 		});
+		
+		
 	}
 
 	var createPageOnLoad = function(){
@@ -139,6 +142,7 @@ structure.pageManager = function(page) {
 };
 
 
+$
 /*
 
 // duck punch the hide method so it does the right thing on show and hide. 
