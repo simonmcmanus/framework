@@ -55,7 +55,7 @@ img {
 
 .loading {
 	border:1px solid red;
-	position: relative;
+	position: absolute;
 }
 
 #photo {
@@ -71,6 +71,8 @@ img {
 	right:2em;
 	top:15em;
 }
+
+
 #flickr  li {
 	list-style:none;
 }
@@ -79,5 +81,5 @@ img {
 	display:none;
 }
 #flickr a{
-display:inline;
+display:inline-block;
 }

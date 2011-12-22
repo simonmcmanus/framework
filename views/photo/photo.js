@@ -15,7 +15,7 @@ structure.views.photo = function(domNode) {
 			border: '2px solid red',
 			left: $clicked.position().left
 		})
-//		$clicked.append($loading);
+		$clicked.append($loading);
 		that.domNode.find('#photo img').fadeOut('fast', callback);
 	};
 	
@@ -40,19 +40,23 @@ structure.views.photo = function(domNode) {
 			var l = $(this).offset().left + 9999 + $('#container').position().left;
 //			debugger;
 			that.domNode.find('h3').hide().fadeIn('slow');
-			console.log(h,w, t, l);
+			
+			var $clickedImg = $clicked.find('img');
 			$(this).css({
 				height:'75',
 				width: 75,
-				left: $clicked.offset().left, 
-				top: $clicked.offset().top,
+				zIndex: 100,
+				left: $clickedImg.offset().left  - 10, 
+				top: $clickedImg.offset().top - 10,
 				position: 'absolute'
 			});
+			
 			
 			$('#container .active').removeClass('active').addClass('inactive');
 			that.domNode.addClass('active').removeClass('inactive');
 			
-			
+ //			debugger;			
+//			$clickedImg.hide();
 			$(this).animate({
 				width: w,
 				height: h,
