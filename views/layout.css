@@ -74,6 +74,10 @@ img {
 #flickr  li {
 	list-style:none;
 }
+
+.info {
+	display:none;
+}
 #flickr a{
 display:inline;
 }
