@@ -1,6 +1,6 @@
-structure.views.harryDog = function() {
+structure.views.harryDog = function(domNode) {
 	var that = this;
-	that.init($('#container div[data-view="harryDog"]')); // set domNode
+	that.init(domNode); // set domNode
 	
  	that.show = function(options, callback) {
 		console.log('harryDog show');
@@ -9,7 +9,7 @@ structure.views.harryDog = function() {
 	};
 	that.hide = function(options, callback) {
 		that.domNode.find('h3').fadeOut();
-		console.log('harryDog Hide');
+		console.log(options);
 		if(options && options.clicked){
 			var $clicked = $(options.clicked);
 			var DURATION = 200; 

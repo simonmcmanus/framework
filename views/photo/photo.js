@@ -21,8 +21,7 @@ structure.views.photo = function(domNode) {
 	that.show = function(options) {
 		var $clicked = $(options.clicked);
 		var $html = that.domNode;
-		that.domNode.removeClass('inactive');
-		that.domNode.fadeIn();
+		that.domNode.find('h3').hide().fadeIn('slow');
 		var $hiddenDiv = $html.appendTo($('#hiddenDiv #hiddenRel'));
 		$hiddenDiv.find('img').bind('load', function() {
 			var h = $(this).height();
@@ -36,7 +35,9 @@ structure.views.photo = function(domNode) {
 				top: $clicked.css('top'),
 				position: 'absolute'
 			});
-//			$('#container .active').addClass('inactive').removeClass('active');	//
+			that.domNode.removeClass('inactive');
+			
+			$('#container .active').removeClass('active').addClass('inactive');
 
 			$html.wrap('<div id="'+ window.location.pathname +'"></div>');
 			$('#container').append($html);

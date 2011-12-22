@@ -15,11 +15,10 @@ structure.pageManager = function(page) {
 	var views = {};
 	var modules = {};
 
-	scope.active = page || structure.views.active ;
+	scope.active = page || structure.pages.active ;
 
 	scope.get = function(url, pageSpec, callback) {
 		// check if we already have the domNode
-		
 		$node = $(scope.wrapString(url,  pageSpec));
 		$node.appendTo('#container');// setup domNode
 		$($node).load(url + '.html', function(data) { // go get contents 
@@ -31,35 +30,28 @@ structure.pageManager = function(page) {
 	};
 
 	scope.show = function(options) {
-//		$('#container .active').fadeOut().removeClass('active');
 		scope.pages[options.href].show(options);
-		console.log('s', scope.pages[options.href], scope.pages[options.href].domNode);
 		scope.setActive(scope.pages[options.href].domNode);
 	};
-	
-	scope.getModuleFiles = function() {
-		
-	};
-	
+
 	scope.new = function(url, domNode, options) {
+		console.log('new called ', url);
 		var pageSpec = $(domNode).attr('data-pageSpec');
-		
 		scope.pages[url] = new structure.views[structure.specManager.getViewFromSpec(pageSpec)](domNode);  // add view functions to the obj
-		
-		
-//		scope.pages[url] = structure.views[structure.specManager.getViewFromSpec(pageSpec)]; // add view functions to the obj
-		return scope.pages[url].domNode = domNode; 
+		scope.pages[url].domNode = domNode; 
+		console.log('new done');
 	};
 	
 	scope.setActive = function(domNode) {
+		scope.pages.activeNode = domNode;
 //		$('#container .active').removeClass('active').addClass('inactive');
 //		domNode.addClass('active').removeClass('active');
 //		scope.active = page;
 	};
 	scope.wrapExisting = function() {
-		var $wrapper = $('<div data-url="'+ window.location.pathname +'" data-pageSpec="'+ structure.pages.active +'" class="resource active"></div>');
-		$('#container').children().wrapAll($wrapper);
-		return $wrapper;
+		var $wrapper = $('<div data-url="'+ window.location.pathname +'" data-pageSpec="'+ structure.pages.active +'" class="active"></div>');
+		var $w = $('#container').children().wrapAll($wrapper);
+		return $('#container [data-url]'); // todo : not keen on this - we should be able to get the object from a return value. $wrapper and $w dont seem to do the job.
 	};
 	scope.wrapString =  function(url, pageSpec, data) {
 		return '<div data-url="' + url + '" data-pageSpec="' + pageSpec + '" class="inactive">' + data || "" + '</div>';
@@ -77,7 +69,10 @@ structure.pageManager = function(page) {
 				scope.show(options);
 			}
 		};
-		$('#container .active').fadeOut(200, function() {
+		
+		// hide the active page? hjow is hide going to work?
+		// do hide
+		structure.pageManager.pages[structure.pages.active].hide(options, function() {
 			c++;
 			show(c);
 		});
@@ -96,10 +91,29 @@ structure.pageManager = function(page) {
 };
 
 
+/*
+
+// duck punch the hide method so it does the right thing on show and hide. 
+
+(function($, structure){
+   // store original reference to the method
+    var _oldHide = $.fn.hide;
+ 
+    $.fn.hide = function(){
+		var url = $(this).attr('data-url');
+		if(url){
+			
+			return structure.pageManager.pages[url].hide.apply(this, arguments);
+		}else {
+           return _oldHide.apply(this,arguments);
+		}
+    };
+})(jQuery, structure);
 
 
 
 
+*/
 
 
 $(document).ready(function() {
