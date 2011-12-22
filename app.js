@@ -23,7 +23,8 @@ structure.serve({
 			modules: [
 				'mainNav',
 				'content',
-				'photo'
+				'photo',
+				'flickr'
 			]
 		},
 		'/photos': {

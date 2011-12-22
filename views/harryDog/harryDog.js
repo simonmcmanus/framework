@@ -4,12 +4,12 @@ structure.views.harryDog = function(domNode) {
 	
  	that.show = function(options, callback) {
 		console.log('harryDog show');
-		that.domNode.removeClass('inactive').addClass('active').show();
-		that.domNode.find('#flickr a, #flickr2 a').css({'position': 'relative', marginLeft: 0, left: 0, top: 0});
+//		that.domNode.removeClass('inactive').addClass('active').show();
+		that.domNode.find('h3').fadeIn();
+		that.domNode.find('#flickr a, #flickr2 a').css('position', 'relative').animate({ marginLeft: 0, left: 0, top: 0}, 200);
 	};
 	that.hide = function(options, callback) {
 		that.domNode.find('h3').fadeOut();
-		console.log(options);
 		if(options && options.clicked){
 			var $clicked = $(options.clicked);
 			var DURATION = 200; 
@@ -22,7 +22,6 @@ structure.views.harryDog = function(domNode) {
 				top: top,
 				zIndex: 10
 			};
-
 			$clicked.css(o);
 		}else {
 			$clicked = null; // set null for not clause to follow.

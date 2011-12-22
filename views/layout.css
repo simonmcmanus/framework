@@ -21,7 +21,6 @@ h3 {
 	background: rgba(30, 30,30, 0.4);
 	padding: 0;
 	margin: 10px;
-	min-height:500px;
 }
 
 a {
@@ -37,8 +36,17 @@ ul {
 	
 }
 #hiddenDiv .hiddenRel{
+display:none;
 }
 
 #container .inactive {
 	display:none;
+}
+
+img {
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	margin: 10px;
+	border:1px solid black;
 }

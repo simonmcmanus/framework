@@ -17,7 +17,7 @@ exports.getSelectors = function(params,  callback ) {
 			msg += chunk;
 		}).on('end', function(data) {
 			var photo = JSON.parse(msg).photo;
-			var url = 'http://farm' + photo.farm + '.staticflickr.com/' + photo.server + '/'  + photo.id + '_'  + photo.secret + '.jpg';
+			var url = 'http://farm' + photo.farm + '.staticflickr.com/' + photo.server + '/'  + photo.id + '_'  + photo.secret + '_z.jpg';
 			
 			var selectors = {
 				h3: photo.title._content,

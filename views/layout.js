@@ -4,6 +4,7 @@
 
 structure.specManager = {
 	getViewFromSpec: function(pageSpec) {
+		console.log(pageSpec);
 		return structure.options.pageSpecs[pageSpec].view;
 	}
 };
@@ -15,41 +16,59 @@ structure.pageManager = function(page) {
 	var views = {};
 	var modules = {};
 
-	scope.active = page || structure.pages.active ;
-
+	
 	scope.get = function(url, pageSpec, callback) {
-		// check if we already have the domNode
-		$node = $(scope.wrapString(url,  pageSpec));
-		$node.appendTo('#container');// setup domNode
-		$($node).load(url + '.html', function(data) { // go get contents 
-			scope.new(url, $node,  {})
-			if(callback){
+		
+		// we need to allow for the dom node to be updated.
+		if(scope.pages[url]) {
+			if(callback) {
 				callback();
 			}
-		});
+		}else { // fetch domNode
+			$node = $(scope.wrapString(url,  pageSpec));
+			$node.appendTo('#container');// setup domNode
+			$($node).load(url + '.html', function(data) { // go get contents 
+			scope.new(url, $node,  {})
+				if(callback){
+					callback();
+				}
+			});			
+		}
 	};
 
-	scope.show = function(options) {
-		scope.pages[options.href].show(options);
+	scope.show = function(options, callback) {
+		scope.pages[options.href].show(options, callback);
 		scope.setActive(scope.pages[options.href].domNode);
 	};
 
 	scope.new = function(url, domNode, options) {
-		console.log('new called ', url);
 		var pageSpec = $(domNode).attr('data-pageSpec');
+		console.log('new called ', url, pageSpec, structure.specManager.getViewFromSpec(pageSpec), structure.views);
 		scope.pages[url] = new structure.views[structure.specManager.getViewFromSpec(pageSpec)](domNode);  // add view functions to the obj
 		scope.pages[url].domNode = domNode; 
 		console.log('new done');
 	};
 	
+	scope.activate = function(title, href, pageSpec) {
+		// set active var
+		// do pushState
+		structure.pageManager.pages[structure.state.url].domNode.addClass('inactive').removeClass('active');
+		structure.state.url = href;
+		console.log('s',structure.pageManager.pages[href].domNode);
+		structure.pageManager.pages[href].domNode.addClass('active').removeClass('inactive');
+		structure.state.spec = pageSpec;
+		scope.pageBindings(structure.pageManager.pages[href].domNode);
+		
+	};
+	// need to have already got the page before calling.
 	scope.setActive = function(domNode) {
-		scope.pages.activeNode = domNode;
+//		scope.pages.activeNode = domNode;
 //		$('#container .active').removeClass('active').addClass('inactive');
 //		domNode.addClass('active').removeClass('active');
 //		scope.active = page;
 	};
 	scope.wrapExisting = function() {
-		var $wrapper = $('<div data-url="'+ window.location.pathname +'" data-pageSpec="'+ structure.pages.active +'" class="active"></div>');
+		var $wrapper = $('<div data-url="'+ window.location.pathname +'" data-pageSpec="'+ structure.state.spec +'" class="active"></div>');
 		var $w = $('#container').children().wrapAll($wrapper);
 		return $('#container [data-url]'); // todo : not keen on this - we should be able to get the object from a return value. $wrapper and $w dont seem to do the job.
 	};
@@ -60,19 +79,27 @@ structure.pageManager = function(page) {
 	scope.pushState = function(state, title, url) {
 		window.history.pushState(state, title, url);
 	}
-	
-	
+	/*
+	options = {
+		href: '/photos',
+		pageSpec: :/photos
+	}
+	*/
 	scope.switch = function(options) {
 		var c = 0;
+		scope.pushState({}, 'title', options.href);
+		
 		var show = function(c) {
 			if(c==2){ // once we have hidden the active view and got the new view....
-				scope.show(options);
+					scope.show(options, function() {
+					scope.activate( 'NO NEW TITLE', options.href, options.pageSpec);
+				});
 			}
 		};
 		
 		// hide the active page? hjow is hide going to work?
 		// do hide
-		structure.pageManager.pages[structure.pages.active].hide(options, function() {
+		structure.pageManager.pages[structure.state.url].hide(options, function() {
 			c++;
 			show(c);
 		});
@@ -81,10 +108,31 @@ structure.pageManager = function(page) {
 			show(c);
 		});
 	};
+	
+	scope.pageBindings = function(domNode){
+		if(domNode){
+			var $links = domNode.find('a[data-pagespec]');
+		}else {
+			var $links = $('a[data-pagespec]');
+		}
+		$links.click(function(e) {
+			e.preventDefault();
+			// INIT NEW VIEW HERE - WE NEED TO GO AND GET THE HTML
+			var newView = $(this).attr('data-pagespec');
+			structure.pageManager.switch({
+				pageSpec: newView, 
+				href: $(this).attr('href'),
+				clicked: this,
+				doPushState: true
+			});
+			return false;
+		});
+	}
 
 	var createPageOnLoad = function(){
 //		scope.setActive(window.location.pathname);
-		scope.new(scope.active, scope.wrapExisting(),  {});
+		scope.new(window.location.pathname, scope.wrapExisting(),  {});
+		structure.state.url = window.location.pathname;
 	};
 	createPageOnLoad();
 	return scope;
@@ -117,27 +165,8 @@ structure.pageManager = function(page) {
 
 
 $(document).ready(function() {
-
-	// order of the below matters.
 	structure.pageManager = structure.pageManager();
-
-
-
-	// load file 
-
-	structure.views.Base.setActive(structure.views.active); // turn string into reference to real view obj.
-	$('a[data-pagespec]').click(function(e) {
-		e.preventDefault();
-		// INIT NEW VIEW HERE - WE NEED TO GO AND GET THE HTML
-		var newView = $(this).attr('data-pagespec');
-		structure.pageManager.switch({
-			pageSpec: newView, 
-			href: $(this).attr('href'),
-			clicked: this,
-			doPushState: true
-		});
-		return false;
-	});
+	structure.pageManager.pageBindings();
 });
 
 
@@ -147,24 +176,26 @@ $(document).ready(function() {
 Auto generates leviroutes pop state listeners. 
 */
 var app = new routes();
-for(pageSpec in structure.options.pageSepcs){
-	var wrapper = function(resourceView) {
+for(pageSpec in structure.options.pageSpecs){
+	console.log(pageSpec);
+	var wrapper = function(pageSpec) {
 		return function(req) {
-			// should not call switch if page is being loaded for the first time.
-			console.log('popstate called');
-		//	structure.views.active.show();
-/*
-			console.log(arguments);
-			structure.views.active.switch({
-				to: resourceView
-			});
-		*/
+			if(pageSpec != structure.state.spec){
+					structure.pageManager.switch({
+						href: window.location.pathname,
+						pageSpec: pageSpec
+					});
+				
+			}else {
+				console.log('first page load');
+			}
+
 		}
 	};
-	app.get(resource, wrapper(structure.options.pageSpecs[pageSpec].view));
+	app.get(pageSpec, wrapper(pageSpec));
 }
 
-
+structure.views = {};
 structure.views.Base = {
 	init: function($domNode) {
 		var that = this;

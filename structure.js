@@ -99,7 +99,9 @@ exports.serve = function(options) {
 	            selectors['#' + options.modules[c]] = app.modules[options.modules[c]].html;
             }
         }
-        selectors['script#structureOptions'] = 'var structure = { options: ' + JSON.stringify(allOptions) + ' }; structure.views = { active: "'+ view +'" }; structure.pages = { active: "'+ pageSpec +'" }; ';
+		var js  = 'var structure = { options: ' + JSON.stringify(allOptions) + ' };' + 
+		'structure.state = {  spec: "'+ pageSpec +'"}';
+        selectors['script#structureOptions'] = js;
         return selectors;
     }
 };
@@ -176,7 +178,7 @@ exports.view = function(view, options) {
                 res.render( __dirname + '/views/' + options.pageSpecs[view].view + '/' + options.pageSpecs[view].view + format, {
                     layout: (req.params.format != 'html' ), /*layout false if format is .html */
                     classifyKeys: false,
-                    selectors: buildSelectors( out, options.pageSpecs[view], options, options.pageSpecs[view].view, pageSpec )
+                    selectors: buildSelectors( out, options.pageSpecs[view], options, options.pageSpecs[view].view, view )
                 });
 				return false;
             };

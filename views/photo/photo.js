@@ -6,19 +6,22 @@ structure.views.photo = function(domNode) {
  	that.init(domNode); // set domNode
 	
 	that.hide = function(options, callback) {
-		console.log('photo hide');
-		$('#container div[data-view="photo"] img').animate({
+		console.log('photo hide', that.domNode);
+	//	that.domNode.addClass('inactive').removeClass('active');
+		that.domNode.find('img').animate({
 			width: 75,
 			height: 75,
 		}, 100, function() {
-//			$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
-			
+			console.log(this);
+			//$('#container div[data-view="photo"]').removeClass('active').addClass('inactive');// todo - use domnode - loading order issue
 		});
+		
+		
 		if(callback){
 			callback();
 		}
 	};
-	that.show = function(options) {
+	that.show = function(options, callback) {
 		var $clicked = $(options.clicked);
 		var $html = that.domNode;
 		that.domNode.find('h3').hide().fadeIn('slow');
@@ -26,7 +29,7 @@ structure.views.photo = function(domNode) {
 		$hiddenDiv.find('img').bind('load', function() {
 			var h = $(this).height();
 			var w = $(this).width();
-			var t = $(this).position().top;
+			var t = $(this).position().top;	 
 			var l = $(this).position().left;
 			$(this).css({
 				height:'75',
@@ -35,9 +38,8 @@ structure.views.photo = function(domNode) {
 				top: $clicked.css('top'),
 				position: 'absolute'
 			});
-			that.domNode.removeClass('inactive');
-			
-			$('#container .active').removeClass('active').addClass('inactive');
+//			that.domNode.removeClass('inactive');
+//			$('#container .active').removeClass('active').addClass('inactive');
 
 			$html.wrap('<div id="'+ window.location.pathname +'"></div>');
 			$('#container').append($html);
@@ -46,10 +48,13 @@ structure.views.photo = function(domNode) {
 				height: h,
 				top: $('#container').position().top+60,
 				left: $('#container').position().left
-			}, 400, function() {
+			}, 1000, function() {
 				$(this).css('position', 'static');
 			});
 		});
+		if(callback) {
+			callback();
+		}
 	};
 	
 	
