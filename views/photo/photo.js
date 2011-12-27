@@ -11,6 +11,7 @@ structure.views.photo = function(domNode) {
 		$('#container').css('height', h);
 		$clicked = $(options.clicked);
 		var $loading = $('<span class="loading">loading</span>');
+		that.domNode.find('.info').fadeOut();
 		$loading.css({
 			border: '2px solid red',
 			left: $clicked.position().left
@@ -32,15 +33,16 @@ structure.views.photo = function(domNode) {
 	
 	
 	that.show = function(options, callback) {
-//		that.domNode.find('img').fadeIn();
-		console.log('DN', that.domNode);
+		that.domNode.find('.info').hide();
+		$('#container').animate({
+			'height': that.domNode.height()
+		}, 200);
 		var $clicked = $(options.clicked);
 		var showPage = function($page, $clicked) {
 			var h = $page.height();
 			var w = $page.width();
 			var t = $page.position().top + $('#container').offset().top;
 			var l = $page.offset().left + 9999 + $('#container').position().left;
-			//debugger;
 			that.domNode.find('h3').hide().fadeIn('slow');
 			var $clickedImg = $clicked.find('img');
 			$page.css({
@@ -62,8 +64,7 @@ structure.views.photo = function(domNode) {
 				left: l
 			}, 1000, function() {		
 				$(this).css('position', 'static');
-			//	$('#container .active').removeClass('active').addClass('inactive');
-			//	that.domNode.addClass('active').removeClass('inactive');
+				that.domNode.find('.info').fadeIn();
 			});
 		};
 		

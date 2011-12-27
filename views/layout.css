@@ -87,6 +87,8 @@ display:inline-block;
 }
 
 .info {
+	display:inline-block;
+	vertical-align:top;
 }
 #flickr a{
 }
