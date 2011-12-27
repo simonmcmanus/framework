@@ -4,7 +4,6 @@
 
 structure.specManager = {
 	getViewFromSpec: function(pageSpec) {
-		console.log(pageSpec);
 		return structure.options.pageSpecs[pageSpec].view;
 	}
 };
@@ -42,10 +41,8 @@ structure.pageManager = function(page) {
 
 	scope.new = function(url, domNode, options) {
 		var pageSpec = $(domNode).attr('data-pageSpec');
-		console.log('new called ', url, pageSpec, structure.specManager.getViewFromSpec(pageSpec), structure.views);
 		scope.pages[url] = new structure.views[structure.specManager.getViewFromSpec(pageSpec)](domNode);  // add view functions to the obj
 		scope.pages[url].domNode = domNode; 
-		console.log('new done');
 	};
 	
 	scope.activate = function(title, href, pageSpec) {
@@ -81,12 +78,13 @@ structure.pageManager = function(page) {
 	*/
 	scope.switch = function(options) {
 		var c = 0;
-		scope.pushState({}, 'title', options.href);
+		if(options.doPushState != false){
+			scope.pushState({'clickedPathname':options.clicked.pathname }, 'title', options.href);			
+		}
 		
 		var show = function(c) {
 			if(c==2){ // once we have hidden the active view and got the new view....
 				scope.show(options, function() {
-					console.log('DONE SHOW');
 					scope.activate( 'NO NEW TITLE', options.href, options.pageSpec);
 				});
 			}
@@ -109,7 +107,6 @@ structure.pageManager = function(page) {
 			var $links = domNode.find('a[data-pagespec]');
 			
 			domNode.find('img').load(function() {
-			console.log('loaded', this);
 			});
 			
 		}else {
@@ -177,26 +174,48 @@ $(document).ready(function() {
 
 /*
 Auto generates leviroutes pop state listeners. 
-*/
+
 var app = new routes();
 for(pageSpec in structure.options.pageSpecs){
 	console.log(pageSpec);
 	var wrapper = function(pageSpec) {
 		return function(req) {
-			if(pageSpec != structure.state.spec){
+			if(req.url != structure.state.url){
+				console.log('do switch', req );
 					structure.pageManager.switch({
-						href: window.location.pathname,
-						pageSpec: pageSpec
+						href: req.url,
+						pageSpec: pageSpec,
+						doPushState: false
 					});
-				
 			}else {
-				console.log('first page load');
+				
 			}
 
 		}
 	};
 	app.get(pageSpec, wrapper(pageSpec));
 }
+
+*/
+
+window.onpopstate = function(event) {
+	
+  	console.log("location: " + window.location.pathname + ", state: " , event.state);
+
+	if(event.state){
+		var clicked = $('div[data-url="'+ window.location.pathname +'"] #flickr a[href="'+event.state.clickedPathname + '"]');		
+	}else {
+		var clicked = null;
+	}
+		structure.pageManager.switch({
+			href: window.location.pathname,
+			pageSpec: '/photo/:photo',
+			doPushState: false,
+			clicked: clicked
+		});
+	
+};
+
 
 structure.views = {};
 structure.views.Base = {

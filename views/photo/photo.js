@@ -10,7 +10,10 @@ structure.views.photo = function(domNode) {
 		// container should be cached at an app level
 		var h = $('#container').css('height');
 		$('#container').css('height', h);
+		
 		$clicked = $(options.clicked);
+		
+		
 		// util? - shuold be part of the flickr class
 		var $loading = $('<span class="loading">loading</span>');
 		that.domNode.find('.info').fadeOut();
@@ -45,7 +48,7 @@ structure.views.photo = function(domNode) {
 		var $clicked = $(options.clicked);
 		// i think $page should actually be $img 
 		var showPage = function($page, $clicked) {
-			
+			console.log('c', $clicked);
 			var $clickedImg = $clicked.find('img');
 			
 			// we need to make sure we dont run if already running. 
