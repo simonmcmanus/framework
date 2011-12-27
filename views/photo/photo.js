@@ -17,7 +17,7 @@ structure.views.photo = function(domNode) {
 			left: $clicked.position().left
 		})
 		$clicked.append($loading);
-		that.domNode.find('#photo img').fadeOut('fast', callback);
+		that.domNode.find('#photo img').animate({'opacity': 0}, 500, callback);
 	};
 	
 	
@@ -33,12 +33,17 @@ structure.views.photo = function(domNode) {
 	
 	
 	that.show = function(options, callback) {
+		var DURATION = 500;
+		var EASING = 'easeOutCirc';
 		that.domNode.find('.info').hide();
-		$('#container').animate({
-			'height': that.domNode.height()
-		}, 200);
+	
 		var $clicked = $(options.clicked);
+		// i think $page should actually be $img 
 		var showPage = function($page, $clicked) {
+			console.log($page);
+			$('#container').animate({
+				'height': that.domNode.height()
+			}, DURATION, EASING);
 			var h = $page.height();
 			var w = $page.width();
 			var t = $page.position().top + $('#container').offset().top;
@@ -62,7 +67,7 @@ structure.views.photo = function(domNode) {
 				height: h,
 				top: t,
 				left: l
-			}, 1000, function() {		
+			}, DURATION, EASING,  function() {		
 				$(this).css('position', 'static');
 				that.domNode.find('.info').fadeIn();
 			});
@@ -74,7 +79,7 @@ structure.views.photo = function(domNode) {
 			// need the page dom node - find the img - then pass the image in.
 			
 			
-			showPage(that,domNode, $clicked);
+			showPage(that.domNode, $clicked);
 		}
 //		if its been loaded already
 		// load event is not fired if the image has already been loaded. 
