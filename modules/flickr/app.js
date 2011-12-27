@@ -11,12 +11,17 @@ var options = {
 
 exports.getSelectors = function( params, callback ) {
 	var http = require('http');
+	var config = {
+		perPage: 4,
+		photoSetId: '72157625601749859',
+		apiKey: '980e558a7f82c6b2ca3b619004b1a274'
+	}
 	var options = {
 		host: 'api.flickr.com',
 		headers: { 'content-type': 'application/json' },
 		port: 80,
 		encoding:'utf8', /* not sure this is doing anything */
-		path: '/services/rest/?format=json&method=flickr.photosets.getPhotos&photoset_id=72157625601749859&api_key=980e558a7f82c6b2ca3b619004b1a274&per_page=5&nojsoncallback=1'
+		path: '/services/rest/?format=json&method=flickr.photosets.getPhotos&photoset_id='+ config.photoSetId+'&api_key=' + config.apiKey +'&per_page='+ config.perPage +'&nojsoncallback=1'
 	};
 	var msg  = '';
 	http.get(options, function(res) {

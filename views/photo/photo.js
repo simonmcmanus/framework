@@ -6,22 +6,23 @@ structure.views.photo = function(domNode) {
  	that.init(domNode); // set domNode
 	
 	that.hide = function(options, callback) {
-		var h = $('#container').css('height');
 		
+		// container should be cached at an app level
+		var h = $('#container').css('height');
 		$('#container').css('height', h);
 		$clicked = $(options.clicked);
+		// util? - shuold be part of the flickr class
 		var $loading = $('<span class="loading">loading</span>');
 		that.domNode.find('.info').fadeOut();
 		$loading.css({
-			border: '2px solid red',
 			left: $clicked.position().left
 		})
 		$clicked.append($loading);
-		that.domNode.find('#photo img').animate({'opacity': 0}, 500, callback);
+		// photo fade out 
+		that.domNode.find('#photo img').animate({'opacity': 0}, 200, callback);
 	};
 	
-	
-	
+	// delete?
 	var showOtherPics = function() {
 		$('#flickr').css({
 			top: '5em',
@@ -33,13 +34,21 @@ structure.views.photo = function(domNode) {
 	
 	
 	that.show = function(options, callback) {
-		var DURATION = 500;
+		var DURATION = 800;
 		var EASING = 'easeOutCirc';
+		
+		
+		// module method
+		that.domNode.find('#photo img').css({'opacity': 1});
 		that.domNode.find('.info').hide();
 	
 		var $clicked = $(options.clicked);
 		// i think $page should actually be $img 
 		var showPage = function($page, $clicked) {
+			
+			var $clickedImg = $clicked.find('img');
+			
+			// we need to make sure we dont run if already running. 
 			console.log($page);
 			$('#container').animate({
 				'height': that.domNode.height()
@@ -49,7 +58,6 @@ structure.views.photo = function(domNode) {
 			var t = $page.position().top + $('#container').offset().top;
 			var l = $page.offset().left + 9999 + $('#container').position().left;
 			that.domNode.find('h3').hide().fadeIn('slow');
-			var $clickedImg = $clicked.find('img');
 			$page.css({
 				height:'75',
 				width: 75,
@@ -69,26 +77,18 @@ structure.views.photo = function(domNode) {
 				left: l
 			}, DURATION, EASING,  function() {		
 				$(this).css('position', 'static');
-				that.domNode.find('.info').fadeIn();
+				that.domNode.find('.info').fadeIn('fast', callback);
 			});
 		};
-		
-		
-		if($clicked.hasClass('loaded')){
-			
-			// need the page dom node - find the img - then pass the image in.
-			
-			
-			showPage(that.domNode, $clicked);
-		}
-//		if its been loaded already
-		// load event is not fired if the image has already been loaded. 
-		that.domNode.find('#photo img').bind('load', function() {
-			showPage($(this), $clicked);
+
+		that.domNode.find('#photo img').one('load', function() {
+				showPage($(this), $clicked);
+		})
+		.each(function(){
+			if(this.complete) {
+				$(this).trigger("load");
+			}
 		});
-		if(callback) {
-			callback();
-		}
 	};
 	
 	

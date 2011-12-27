@@ -16,6 +16,7 @@ h1 {
 h3 {
 	background: rgba(30, 30,30, 0.4);
 	padding:5px 10px ;
+	margin: 0;
 }
 #container {
 	background: rgba(30, 30,30, 0.4);
@@ -64,11 +65,11 @@ img {
 }
 
 #flickr.right {
-	margin:2em;
+	margin:5px;
 	float:right;
 	top: 1em;
 	position:absolute;
-	right:2em;
+	right:40px;
 	top:15em;
 }
 
@@ -76,8 +77,14 @@ img {
 #flickr.right  li {
 	list-style:none;
 	display:block;
+	padding:2px;
+	margin:2px;
 }
 
+#flickr.right  li img {
+margin: 5px 10px;
+padding: 0;
+}
 #flickr  li {
 display:inline-block;
 }
