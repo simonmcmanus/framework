@@ -18,7 +18,6 @@ structure.pageManager = function(page) {
 
 	
 	scope.get = function(url, pageSpec, callback) {
-		
 		// we need to allow for the dom node to be updated.
 		if(scope.pages[url]) {
 			if(callback) {

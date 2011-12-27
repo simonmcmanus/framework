@@ -32,17 +32,18 @@ structure.views.photo = function(domNode) {
 	
 	
 	that.show = function(options, callback) {
+//		that.domNode.find('img').fadeIn();
+		console.log('DN', that.domNode);
 		var $clicked = $(options.clicked);
-		that.domNode.find('#photo img').bind('load', function() {
-			var h = $(this).height();
-			var w = $(this).width();
-			var t = $(this).position().top + $('#container').offset().top;
-			var l = $(this).offset().left + 9999 + $('#container').position().left;
-//			debugger;
+		var showPage = function($page, $clicked) {
+			var h = $page.height();
+			var w = $page.width();
+			var t = $page.position().top + $('#container').offset().top;
+			var l = $page.offset().left + 9999 + $('#container').position().left;
+			//debugger;
 			that.domNode.find('h3').hide().fadeIn('slow');
-			
 			var $clickedImg = $clicked.find('img');
-			$(this).css({
+			$page.css({
 				height:'75',
 				width: 75,
 				zIndex: 100,
@@ -50,25 +51,34 @@ structure.views.photo = function(domNode) {
 				top: $clickedImg.offset().top - 10,
 				position: 'absolute'
 			});
-			
-			
+
 			$('#container .active').removeClass('active').addClass('inactive');
 			that.domNode.addClass('active').removeClass('inactive');
-			
- //			debugger;			
-//			$clickedImg.hide();
-			$(this).animate({
+
+			$page.animate({
 				width: w,
 				height: h,
 				top: t,
 				left: l
 			}, 1000, function() {		
 				$(this).css('position', 'static');
-				
-		//		$('#container .active').removeClass('active').addClass('inactive');
-		//		that.domNode.addClass('active').removeClass('inactive');
-				
+			//	$('#container .active').removeClass('active').addClass('inactive');
+			//	that.domNode.addClass('active').removeClass('inactive');
 			});
+		};
+		
+		
+		if($clicked.hasClass('loaded')){
+			
+			// need the page dom node - find the img - then pass the image in.
+			
+			
+			showPage(that,domNode, $clicked);
+		}
+//		if its been loaded already
+		// load event is not fired if the image has already been loaded. 
+		that.domNode.find('#photo img').bind('load', function() {
+			showPage($(this), $clicked);
 		});
 		if(callback) {
 			callback();

@@ -61,9 +61,9 @@ img {
 #photo {
 	width: 100%;
 	display:inline-block;
-	
 }
-#flickr {
+
+#flickr.right {
 	margin:2em;
 	float:right;
 	top: 1em;
@@ -73,13 +73,20 @@ img {
 }
 
 
-#flickr  li {
+#flickr.right  li {
 	list-style:none;
+	display:block;
+}
+
+#flickr  li {
+display:inline-block;
+}
+
+#flickr {
+	
 }
 
 .info {
-	display:none;
 }
 #flickr a{
-display:inline-block;
 }

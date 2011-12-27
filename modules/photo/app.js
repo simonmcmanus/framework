@@ -17,11 +17,15 @@ exports.getSelectors = function(params,  callback ) {
 			msg += chunk;
 		}).on('end', function(data) {
 			var photo = JSON.parse(msg).photo;
+			console.log(photo);
 			var url = 'http://farm' + photo.farm + '.staticflickr.com/' + photo.server + '/'  + photo.id + '_'  + photo.secret + '_z.jpg';
 			
 			var selectors = {
 				h3: photo.title._content,
 				'.views': photo.views,
+				'.dateuploaded': photo.dateuploaded,
+				'.description': photo.description,
+				'.owner': photo.owner.username,
 				img: {
 					src: url
 				}
