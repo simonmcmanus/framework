@@ -4,6 +4,9 @@ structure.views.harryDog = function(domNode) {
  	that.show = function(options, callback) {
 		console.log('harryDog show');
 //		that.domNode.removeClass('inactive').addClass('active').show();
+		$('#container .active').removeClass('active').addClass('inactive');
+		that.domNode.addClass('active').removeClass('inactive');
+		
 		that.domNode.find('h3').fadeIn('fast');
 		that.domNode.find('a').show();
 		that.domNode.find('#flickr a, #flickr2 a').show().css('position', 'relative').animate({ marginLeft: 0, left: 0, top: 0}, 400);
@@ -15,7 +18,7 @@ structure.views.harryDog = function(domNode) {
 			var $clicked = $(options.clicked);
 			var href = $clicked.attr('href').split('/');
 			var left = $clicked.offset().left;
-			var top = $clicked.position().top;
+			var top = $clicked.position().top - 75;
 			var o  = {
 				position:'absolute',
 				left: left, 

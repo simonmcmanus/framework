@@ -10,19 +10,25 @@ structure.views.photo = function(domNode) {
 		// container should be cached at an app level
 		var h = $('#container').css('height');
 		$('#container').css('height', h);
+		console.log('>', options);
+/*
+
+if we are loading from a clicked image that fine, use the clicked object 
+*/		
+		if(options.clicked){
+			$clicked = options.clicked;
+			// util? - shuold be part of the flickr class
+			var $loading = $('<span class="loading"></span>');
+			that.domNode.find('.info').fadeOut();
+			$loading.css({
+				left: $clicked.position().left + 15,
+				top: '16px'
+			});
+			$clicked.wrap($loading);
+			// photo fade out 
+		}
 		
-		$clicked = $(options.clicked);
 		
-		
-		// util? - shuold be part of the flickr class
-		var $loading = $('<span class="loading"></span>');
-		that.domNode.find('.info').fadeOut();
-		$loading.css({
-			left: $clicked.position().left + 15,
-			top: '16px'
-		});
-		$clicked.wrap($loading);
-		// photo fade out 
 		that.domNode.find('#photo img').animate({'opacity': 0}, 200, callback);
 	};
 	

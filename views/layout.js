@@ -190,7 +190,6 @@ for(pageSpec in structure.options.pageSpecs){
 			}else {
 				
 			}
-
 		}
 	};
 	app.get(pageSpec, wrapper(pageSpec));
@@ -210,7 +209,6 @@ var onPageLoad = function(event) {
 	}else {
 		duration = null;
 	}
-	
 	structure.pageManager.switch({
 		href: window.location.pathname,
 		animateHide: false,
