@@ -198,28 +198,19 @@ for(pageSpec in structure.options.pageSpecs){
 
 */
 
-window.onpopstate = function(event) {
-	alert('popstatefired');
-	/*
-  	console.log("location: " + window.location.pathname + ", state: " , structure.state.url);	
-
-
-	/*
-	Need to detect page loads vs back button - do we need to hide / show  or just show.
-	*/
-
-	if(event.state){
+// fired on page load - workaround for popstate listeners.
+var onPageLoad = function(event) {
+	if(event && event.state){
 		var clicked = $('div[data-url="'+ window.location.pathname +'"] #flickr a[href="'+event.state.clickedPathname + '"]');		
 	}else {
 		var clicked = null;
 	}
-	
-	
 	if(window.location.pathname === structure.state.url){
 		duration = 0;  // do not animate show.
 	}else {
 		duration = null;
 	}
+	
 	structure.pageManager.switch({
 		href: window.location.pathname,
 		animateHide: false,
@@ -227,10 +218,20 @@ window.onpopstate = function(event) {
 		doPushState: false,
 		clicked: clicked
 	});
-
-	
+};
+var loaded = false;
+// only used to detect back and forward, on load handled on load to avoid browser incosistancies. 
+window.onpopstate = function(event) {
+		onPageLoad(event);
+		loaded = true;
 };
 
+window.onload = function() {
+	if(loaded === false){
+		onPageLoad(null);
+		loaded = true;
+	}
+}
 
 structure.views = {};
 structure.views.Base = {
