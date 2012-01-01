@@ -55,8 +55,11 @@ img {
 
 
 .loading {
-	border:1px solid red;
+	background: url(http://www.loadinfo.net/images/preview/18_clock_five_24.gif?1200916238) no-repeat #111;
 	position: absolute;
+	height:75px;
+	width:75px;
+	opacity:  0.7;
 }
 
 #photo {
@@ -89,8 +92,8 @@ padding: 0;
 display:inline-block;
 }
 
-#flickr {
-	
+#flickr, #flickr2 {
+height:100px;
 }
 
 .info {
@@ -98,4 +101,10 @@ display:inline-block;
 	vertical-align:top;
 }
 #flickr a{
+}
+
+
+body.js-enabled #container a{
+	display:none;
+
 }

@@ -1,18 +1,20 @@
 structure.views.harryDog = function(domNode) {
 	var that = this;
 	that.init(domNode); // set domNode
-	
  	that.show = function(options, callback) {
+		alert('s2');
 		console.log('harryDog show');
 //		that.domNode.removeClass('inactive').addClass('active').show();
-		that.domNode.find('h3').fadeIn();
-		that.domNode.find('#flickr a, #flickr2 a').css('position', 'relative').animate({ marginLeft: 0, left: 0, top: 0}, 200);
+		that.domNode.find('h3').fadeIn('fast');
+		that.domNode.find('a').show();
+		that.domNode.find('#flickr a, #flickr2 a').show().css('position', 'relative').animate({ marginLeft: 0, left: 0, top: 0}, 400);
 	};
 	that.hide = function(options, callback) {
-		that.domNode.find('h3').fadeOut();
+		alert(1);
+		var DURATION = (options.animateHide === false) ? 0 : 200; // allow animation to be disabled.
+		that.domNode.find('h3').fadeOut(DURATION);
 		if(options && options.clicked){
 			var $clicked = $(options.clicked);
-			var DURATION = 200; 
 			var href = $clicked.attr('href').split('/');
 			var left = $clicked.offset().left;
 			var top = $clicked.position().top;

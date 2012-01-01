@@ -7,7 +7,7 @@ app.modules = require('./modules.js');
 
 
 
-/*hard coded modules*/
+/*hard coded modules - should not be required.*/
 
 app.modules.flickr = require('./modules/flickr/app.js');
 app.modules.flickr2 = require('./modules/flickr2/app.js');

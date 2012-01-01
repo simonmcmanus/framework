@@ -1,7 +1,6 @@
 
 
 
-
 structure.specManager = {
 	getViewFromSpec: function(pageSpec) {
 		return structure.options.pageSpecs[pageSpec].view;
@@ -165,6 +164,7 @@ $
 
 
 $(document).ready(function() {
+	$('body').addClass('js-enabled');
 	structure.pageManager = structure.pageManager();
 	structure.pageManager.pageBindings();
 });
@@ -199,20 +199,35 @@ for(pageSpec in structure.options.pageSpecs){
 */
 
 window.onpopstate = function(event) {
-	
-  	console.log("location: " + window.location.pathname + ", state: " , event.state);
+	alert('popstatefired');
+	/*
+  	console.log("location: " + window.location.pathname + ", state: " , structure.state.url);	
+
+
+	/*
+	Need to detect page loads vs back button - do we need to hide / show  or just show.
+	*/
 
 	if(event.state){
 		var clicked = $('div[data-url="'+ window.location.pathname +'"] #flickr a[href="'+event.state.clickedPathname + '"]');		
 	}else {
 		var clicked = null;
 	}
-		structure.pageManager.switch({
-			href: window.location.pathname,
-			pageSpec: '/photo/:photo',
-			doPushState: false,
-			clicked: clicked
-		});
+	
+	
+	if(window.location.pathname === structure.state.url){
+		duration = 0;  // do not animate show.
+	}else {
+		duration = null;
+	}
+	structure.pageManager.switch({
+		href: window.location.pathname,
+		animateHide: false,
+		pageSpec: '/photo/:photo',
+		doPushState: false,
+		clicked: clicked
+	});
+
 	
 };
 
@@ -357,3 +372,5 @@ structure.moduleManager = function() {
 		
 	};
 };
+
+
