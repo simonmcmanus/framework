@@ -1,7 +1,10 @@
 /**
  returns  an object containing all the modules in the approparite format. 
 
-todo : serve consolidated files.
+CURRENTLY ALLOWS FOR CONCATINATION. QUITE MESSY THOUGH.
+
+could be refactered to 3 lines without concat.
+
 
 **/
 
